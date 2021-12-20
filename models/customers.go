@@ -16,6 +16,7 @@ type Customer struct {
 	State           string             `bson:"state" json:"state"`
 	ZipCode         string             `bson:"zipCode" json:"zipCode"`
 	PurchasedItems  *[]Product         `bson:"purchasedItems" json:"purchasedItems"`
+	InfoEmailOptIn  bool               `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
 	CreatedAt       time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt       time.Time          `bson:"updatedAt" json:"-"`
 }

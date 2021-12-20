@@ -104,7 +104,7 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 	return nil
 }
 
-func (c CustomerRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Customer, error) {
+func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models.Customer, error) {
 	conn := database.MongoConn
 
 	findOptions := options.FindOptions{}
@@ -118,7 +118,7 @@ func (c CustomerRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Cu
 	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
 	findOptions.SetLimit(int64(perPage))
 
-	if newLoginQuery {
+	if newCustomerQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 

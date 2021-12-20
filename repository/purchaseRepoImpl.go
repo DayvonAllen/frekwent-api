@@ -144,7 +144,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	return nil
 }
 
-func (p PurchaseRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Purchase, error) {
+func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models.Purchase, error) {
 	conn := database.MongoConn
 
 	findOptions := options.FindOptions{}
@@ -158,7 +158,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Pu
 	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
 	findOptions.SetLimit(int64(perPage))
 
-	if newLoginQuery {
+	if newPurchaseQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 

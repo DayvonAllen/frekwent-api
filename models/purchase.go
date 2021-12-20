@@ -26,6 +26,7 @@ type Purchase struct {
 	Tax                      int16              `bson:"tax" json:"tax"`
 	Shipped                  bool               `bson:"shipped" json:"shipped"`
 	Delivered                bool               `bson:"delivered" json:"delivered"`
+	InfoEmailOptIn           bool               `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
 	CreatedAt                time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt                time.Time          `bson:"updatedAt" json:"-"`
 }
