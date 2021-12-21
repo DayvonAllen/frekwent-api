@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
+	"time"
 )
 
 type AuthHandler struct {
@@ -32,7 +33,7 @@ func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 
 	var auth util.Authentication
 
-	_, token, err := ah.AuthService.Login(strings.ToLower(details.Email), details.Password, c.IP())
+	user, token, err := ah.AuthService.Login(strings.ToLower(details.Email), details.Password, c.IP())
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
@@ -51,5 +52,14 @@ func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 
 	signedToken = append(signedToken, t...)
 
-	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": string(signedToken)})
+	cookie := new(fiber.Cookie)
+	cookie.Name = "auth"
+	cookie.Value = string(signedToken)
+	cookie.HTTPOnly = true
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+
+	// Set cookie
+	c.Cookie(cookie)
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": user})
 }

@@ -14,8 +14,8 @@ import (
 )
 
 type CouponRepoImpl struct {
-	Coupon  *models.Coupon
-	Coupons *[]models.Coupon
+	Coupon  models.Coupon
+	Coupons []models.Coupon
 }
 
 func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
@@ -58,7 +58,7 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Cou
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), c.Coupons); err != nil {
+	if err = cur.All(context.TODO(), &c.Coupons); err != nil {
 		panic(err)
 	}
 
@@ -70,13 +70,13 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Cou
 		}
 	}(cur, context.TODO())
 
-	return c.Coupons, nil
+	return &c.Coupons, nil
 }
 
 func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
 	conn := database.MongoConn
 
-	err := conn.CouponCollection.FindOne(context.TODO(), bson.D{{"code", code}}).Decode(c.Coupon)
+	err := conn.CouponCollection.FindOne(context.TODO(), bson.D{{"code", code}}).Decode(&c.Coupon)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -86,7 +86,7 @@ func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
 		return nil, fmt.Errorf("error processing data")
 	}
 
-	return c.Coupon, nil
+	return &c.Coupon, nil
 }
 
 func (c CouponRepoImpl) DeleteByCode(code string) error {

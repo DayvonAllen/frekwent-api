@@ -14,12 +14,12 @@ import (
 )
 
 type LoginIpRepoImpl struct {
-	loginIp  *models.LoginIP
-	loginIps *[]models.LoginIP
+	loginIp  models.LoginIP
+	loginIps []models.LoginIP
 }
 
 func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
-	ip, err := l.FindByIp(ip.IpAddress)
+	_, err := l.FindByIp(ip.IpAddress)
 
 	if err != nil {
 		conn := database.MongoConn
@@ -29,7 +29,7 @@ func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
 		ip.CreatedAt = time.Now()
 		ip.UpdatedAt = time.Now()
 
-		_, err := conn.LoginIPCollection.InsertOne(context.TODO(), ip)
+		_, err = conn.LoginIPCollection.InsertOne(context.TODO(), ip)
 
 		if err != nil {
 			return fmt.Errorf("error processing data")
@@ -69,7 +69,7 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Log
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), l.loginIps); err != nil {
+	if err = cur.All(context.TODO(), &l.loginIps); err != nil {
 		panic(err)
 	}
 
@@ -81,13 +81,13 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Log
 		}
 	}(cur, context.TODO())
 
-	return l.loginIps, nil
+	return &l.loginIps, nil
 }
 
 func (l LoginIpRepoImpl) FindByIp(ip string) (*models.LoginIP, error) {
 	conn := database.MongoConn
 
-	err := conn.LoginIPCollection.FindOne(context.TODO(), bson.D{{"ip", ip}}).Decode(l.loginIp)
+	err := conn.LoginIPCollection.FindOne(context.TODO(), bson.D{{"ipAddress", ip}}).Decode(&l.loginIp)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -97,7 +97,7 @@ func (l LoginIpRepoImpl) FindByIp(ip string) (*models.LoginIP, error) {
 		return nil, fmt.Errorf("error processing data")
 	}
 
-	return l.loginIp, nil
+	return &l.loginIp, nil
 }
 
 func (l LoginIpRepoImpl) UpdateLoginIp(ip *models.LoginIP) error {
