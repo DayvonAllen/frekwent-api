@@ -299,6 +299,146 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 	return p.purchase, nil
 }
 
+func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
+	conn := database.MongoConn
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", dto.Id}}
+	update := bson.D{{"$set", bson.D{{"shipped", dto.Shipped},
+		{"trackingId", dto.TrackingId}}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(p.purchase)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
+	conn := database.MongoConn
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", dto.Id}}
+	update := bson.D{{"$set", bson.D{{"delivered", dto.Delivered}}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(p.purchase)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) error {
+	conn := database.MongoConn
+
+	key := config.Config("KEY")
+
+	encrypt := helper.Encryption{Key: []byte(key)}
+
+	var wg sync.WaitGroup
+	wg.Add(5)
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(dto.StreetAddress)
+
+		if err != nil {
+			panic(err)
+		}
+
+		dto.StreetAddress = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		if len(dto.OptionalAddress) > 0 {
+			pi, err := encrypt.Encrypt(dto.OptionalAddress)
+
+			if err != nil {
+				panic(err)
+			}
+
+			dto.OptionalAddress = pi
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(dto.City)
+
+		if err != nil {
+			panic(err)
+		}
+
+		dto.City = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(dto.State)
+
+		if err != nil {
+			panic(err)
+		}
+
+		dto.State = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(dto.ZipCode)
+
+		if err != nil {
+			panic(err)
+		}
+
+		dto.ZipCode = pi
+	}()
+
+	wg.Wait()
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", dto.Id}}
+	update := bson.D{{"$set", bson.D{{"streetAddress", dto.StreetAddress},
+		{"optionalAddress", dto.OptionalAddress},
+		{"city", dto.City},
+		{"state", dto.State},
+		{"zipCode", dto.ZipCode}}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(p.purchase)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) error {
+	conn := database.MongoConn
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", dto.Id}}
+	update := bson.D{{"$set", bson.D{{"trackingId", dto.TrackingId}}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(p.purchase)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewPurchaseRepoImpl() PurchaseRepoImpl {
 	var purchaseRepoImpl PurchaseRepoImpl
 
