@@ -33,13 +33,8 @@ func init() {
 			admin.CreatedAt = time.Now()
 			admin.UpdatedAt = time.Now()
 
-			pwd, err := bcrypt.GenerateFromPassword([]byte(admin.Password), 10)
-
-			if err != nil {
-				panic(err)
-			}
-
-			admin.Password = string(pwd)
+			hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
+			admin.Password = string(hashedPassword)
 
 			_, err = conn.AdminCollection.InsertOne(context.TODO(), admin)
 			if err != nil {

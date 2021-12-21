@@ -8,7 +8,6 @@ import (
 	"freq/models"
 	"freq/util"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,23 +20,29 @@ func (a AuthRepoImpl) Login(username string, password string, ip string) (*model
 
 	conn := database.MongoConn
 
+	fmt.Println(username)
+	fmt.Println(helper.IsEmail(username))
+
 	if helper.IsEmail(username) {
-		opts := options.FindOne()
 		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"email",
-			username}}, opts).Decode(a.user)
+			username}}).Decode(a.user)
 
 		if err != nil {
 			return nil, "", fmt.Errorf("error finding by email")
 		}
+
+		fmt.Println(a.user)
+
 	} else {
-		opts := options.FindOne()
 		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"username",
-			username}}, opts).Decode(a.user)
+			username}}).Decode(a.user)
 
 		if err != nil {
 			return nil, "", fmt.Errorf("error finding by username")
 		}
 	}
+
+	fmt.Println(a.user)
 
 	err := bcrypt.CompareHashAndPassword([]byte(a.user.Password), []byte(password))
 
