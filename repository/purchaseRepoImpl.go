@@ -24,6 +24,7 @@ type PurchaseRepoImpl struct {
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	conn := database.ConnectToDB()
 
+	fmt.Println(helper.RandomString(32))
 	key := config.Config("KEY")
 
 	encrypt := helper.Encryption{Key: []byte(key)}
@@ -135,6 +136,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 
 	wg.Wait()
 
+	fmt.Println(purchase)
 	_, err := conn.PurchaseCollection.InsertOne(context.TODO(), purchase)
 
 	if err != nil {
@@ -168,7 +170,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), p.purchases); err != nil {
+	if err = cur.All(context.TODO(), &p.purchases); err != nil {
 		panic(err)
 	}
 

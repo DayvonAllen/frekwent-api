@@ -31,7 +31,7 @@ func SetupRoutes(app *fiber.App) {
 	product.Get("/:id", prh.FindByProductId)
 	product.Get("", prh.FindAll)
 
-	purchase := api.Group("/iriguchi/purchase")
+	purchase := api.Group("/iriguchi/purchases")
 	purchase.Get("/:id", middleware.IsLoggedIn, ph.FindByPurchaseById)
 	purchase.Get("", middleware.IsLoggedIn, ph.FindAll)
 

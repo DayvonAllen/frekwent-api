@@ -35,7 +35,7 @@ func (ph *PurchaseHandler) FindAll(c *fiber.Ctx) error {
 func (ph *PurchaseHandler) FindByPurchaseById(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 
-	id := c.Query("id")
+	id := c.Params("id")
 
 	monId, err := primitive.ObjectIDFromHex(id)
 
@@ -60,6 +60,18 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
+
+	//for _, items := range *purchase.PurchasedItems {
+	//	price, err := strconv.ParseInt(items.Price, 10, 16)
+	//
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	purchase.FinalPrice = int16(price) + purchase.FinalPrice
+	//}
+
+	purchase.FinalPrice = purchase.FinalPrice + purchase.Tax
+	purchase.Id = primitive.NewObjectID()
 
 	err = ph.PurchaseService.Purchase(purchase)
 
