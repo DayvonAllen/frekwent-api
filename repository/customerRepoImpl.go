@@ -128,7 +128,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), c.customers); err != nil {
+	if err = cur.All(context.TODO(), &c.customers); err != nil {
 		panic(err)
 	}
 
@@ -236,7 +236,7 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), c.customers); err != nil {
+	if err = cur.All(context.TODO(), &c.customers); err != nil {
 		panic(err)
 	}
 
