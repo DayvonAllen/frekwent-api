@@ -6,10 +6,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"freq/config"
+	"freq/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	mRand "math/rand"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 )
@@ -108,4 +112,223 @@ func ExtractData(token string) ([]string, error) {
 
 	tokenValue := strings.Split(xs[1], "|")
 	return tokenValue, nil
+}
+
+func EncryptPurchase(purchase *models.Purchase) *models.Purchase {
+	key := config.Config("KEY")
+
+	encrypt := Encryption{Key: []byte(key)}
+
+	var wg sync.WaitGroup
+	wg.Add(9)
+
+	go func() {
+		defer wg.Done()
+		purchase.Id = primitive.NewObjectID()
+		purchase.PurchaseConfirmationId = RandomString(32)
+		purchase.Shipped = false
+		purchase.Delivered = false
+		purchase.TrackingId = ""
+		purchase.CreatedAt = time.Now()
+		purchase.UpdatedAt = time.Now()
+	}()
+
+	go func() {
+		defer wg.Done()
+		cc, err := encrypt.Encrypt(purchase.CreditCardNumber)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardNumber = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		cc, err := encrypt.Encrypt(purchase.CreditCardSecurityCode)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardSecurityCode = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		cc, err := encrypt.Encrypt(purchase.CreditCardExpirationDate)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardExpirationDate = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(purchase.StreetAddress)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.StreetAddress = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		if len(purchase.OptionalAddress) > 0 {
+			pi, err := encrypt.Encrypt(purchase.OptionalAddress)
+
+			if err != nil {
+				panic(err)
+			}
+
+			purchase.OptionalAddress = pi
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(purchase.City)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.City = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(purchase.State)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.State = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(purchase.ZipCode)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.ZipCode = pi
+	}()
+
+	wg.Wait()
+
+	return purchase
+}
+
+func DecryptPurchase(purchase *models.Purchase) *models.Purchase {
+	key := config.Config("KEY")
+
+	decrypt := Encryption{Key: []byte(key)}
+
+	var wg sync.WaitGroup
+	wg.Add(8)
+
+	go func() {
+		defer wg.Done()
+		cc, err := decrypt.Decrypt(purchase.CreditCardNumber)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardNumber = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		cc, err := decrypt.Decrypt(purchase.CreditCardSecurityCode)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardSecurityCode = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		cc, err := decrypt.Decrypt(purchase.CreditCardExpirationDate)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.CreditCardExpirationDate = cc
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := decrypt.Decrypt(purchase.StreetAddress)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.StreetAddress = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		if len(purchase.OptionalAddress) > 0 {
+			pi, err := decrypt.Decrypt(purchase.OptionalAddress)
+
+			if err != nil {
+				panic(err)
+			}
+
+			purchase.OptionalAddress = pi
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := decrypt.Decrypt(purchase.City)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.City = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := decrypt.Decrypt(purchase.State)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.State = pi
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := decrypt.Decrypt(purchase.ZipCode)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.ZipCode = pi
+	}()
+
+	wg.Wait()
+
+	return purchase
 }
