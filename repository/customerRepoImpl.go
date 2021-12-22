@@ -72,7 +72,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 
 	encrypt := helper.Encryption{Key: []byte(key)}
 
-	unEncyptedCustomers := make([]models.Customer, 0, len(c.customers))
+	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
 		wg.Add(5)
@@ -134,10 +134,10 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 			customer.ZipCode = pi
 		}()
 		wg.Wait()
-		unEncyptedCustomers = append(unEncyptedCustomers, customer)
+		decryptedCustomers = append(decryptedCustomers, customer)
 	}
 
-	return &unEncyptedCustomers, nil
+	return &decryptedCustomers, nil
 }
 
 func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*[]models.Customer, error) {
@@ -177,7 +177,77 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		}
 	}(cur, context.TODO())
 
-	return &c.customers, nil
+	var wg sync.WaitGroup
+	key := config.Config("KEY")
+
+	encrypt := helper.Encryption{Key: []byte(key)}
+
+	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
+
+	for _, customer := range c.customers {
+		wg.Add(5)
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.StreetAddress)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.StreetAddress = pi
+		}()
+
+		go func() {
+			defer wg.Done()
+
+			if len(customer.OptionalAddress) > 0 {
+				pi, err := encrypt.Decrypt(customer.OptionalAddress)
+
+				if err != nil {
+					panic(err)
+				}
+
+				customer.OptionalAddress = pi
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.City)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.City = pi
+		}()
+
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.State)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.State = pi
+		}()
+
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.ZipCode)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.ZipCode = pi
+		}()
+		wg.Wait()
+		decryptedCustomers = append(decryptedCustomers, customer)
+	}
+
+	return &decryptedCustomers, nil
 }
 
 func NewCustomerRepoImpl() CustomerRepoImpl {
