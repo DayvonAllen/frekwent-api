@@ -71,6 +71,6 @@ func (ah *AuthHandler) Logout(c *fiber.Ctx) error {
 		Expires:  time.Now().Add(-(time.Hour * 2)),
 		HTTPOnly: true,
 	})
-	
+
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
