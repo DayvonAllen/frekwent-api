@@ -24,7 +24,6 @@ type PurchaseRepoImpl struct {
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	conn := database.ConnectToDB()
 
-	fmt.Println(helper.RandomString(32))
 	key := config.Config("KEY")
 
 	encrypt := helper.Encryption{Key: []byte(key)}
@@ -136,8 +135,29 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 
 	wg.Wait()
 
-	fmt.Println(purchase)
-	_, err := conn.PurchaseCollection.InsertOne(context.TODO(), purchase)
+	customer := new(models.Customer)
+
+	customer.Id = primitive.NewObjectID()
+	customer.UpdatedAt = time.Now()
+	customer.CreatedAt = time.Now()
+	customer.FirstName = purchase.FirstName
+	customer.LastName = purchase.LastName
+	customer.Email = purchase.Email
+	customer.PurchasedItems = purchase.PurchasedItems
+	customer.StreetAddress = purchase.StreetAddress
+	customer.OptionalAddress = purchase.OptionalAddress
+	customer.City = purchase.City
+	customer.State = purchase.State
+	customer.ZipCode = purchase.ZipCode
+	customer.InfoEmailOptIn = purchase.InfoEmailOptIn
+
+	err := CustomerRepoImpl{}.Create(customer)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.PurchaseCollection.InsertOne(context.TODO(), purchase)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")

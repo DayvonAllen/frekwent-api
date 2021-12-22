@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
+	"strings"
 )
 
 type PurchaseHandler struct {
@@ -72,6 +73,10 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 
 	purchase.FinalPrice = purchase.FinalPrice + purchase.Tax
 	purchase.Id = primitive.NewObjectID()
+
+	purchase.FirstName = strings.ToLower(purchase.FirstName)
+	purchase.LastName = strings.ToLower(purchase.LastName)
+	purchase.Email = strings.ToLower(purchase.Email)
 
 	err = ph.PurchaseService.Purchase(purchase)
 

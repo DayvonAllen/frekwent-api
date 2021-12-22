@@ -8,12 +8,10 @@ import (
 	"freq/helper"
 	"freq/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"sync"
-	"time"
 )
 
 type CustomerRepoImpl struct {
@@ -23,77 +21,6 @@ type CustomerRepoImpl struct {
 
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 	conn := database.ConnectToDB()
-
-	key := config.Config("KEY")
-
-	encrypt := helper.Encryption{Key: []byte(key)}
-
-	var wg sync.WaitGroup
-	wg.Add(5)
-
-	customer.Id = primitive.NewObjectID()
-	customer.CreatedAt = time.Now()
-	customer.UpdatedAt = time.Now()
-
-	go func() {
-		defer wg.Done()
-		pi, err := encrypt.Encrypt(customer.StreetAddress)
-
-		if err != nil {
-			panic(err)
-		}
-
-		customer.StreetAddress = pi
-	}()
-
-	go func() {
-		defer wg.Done()
-
-		if len(customer.OptionalAddress) > 0 {
-			pi, err := encrypt.Encrypt(customer.OptionalAddress)
-
-			if err != nil {
-				panic(err)
-			}
-
-			customer.OptionalAddress = pi
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		pi, err := encrypt.Encrypt(customer.City)
-
-		if err != nil {
-			panic(err)
-		}
-
-		customer.City = pi
-	}()
-
-	go func() {
-		defer wg.Done()
-		pi, err := encrypt.Encrypt(customer.State)
-
-		if err != nil {
-			panic(err)
-		}
-
-		customer.State = pi
-	}()
-
-	go func() {
-		defer wg.Done()
-		pi, err := encrypt.Encrypt(customer.ZipCode)
-
-		if err != nil {
-			panic(err)
-		}
-
-		customer.ZipCode = pi
-	}()
-
-	wg.Wait()
 
 	_, err := conn.CustomerCollection.InsertOne(context.TODO(), customer)
 
@@ -144,6 +71,8 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 	key := config.Config("KEY")
 
 	encrypt := helper.Encryption{Key: []byte(key)}
+
+	unEncyptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
 		wg.Add(5)
@@ -204,11 +133,11 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 
 			customer.ZipCode = pi
 		}()
-
 		wg.Wait()
+		unEncyptedCustomers = append(unEncyptedCustomers, customer)
 	}
 
-	return &c.customers, nil
+	return &unEncyptedCustomers, nil
 }
 
 func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*[]models.Customer, error) {
