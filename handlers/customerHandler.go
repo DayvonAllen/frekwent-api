@@ -5,6 +5,7 @@ import (
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
+	"strings"
 )
 
 type CustomerHandler struct {
@@ -43,7 +44,7 @@ func (ch *CustomerHandler) FindAllByFullName(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid value")})
 	}
 
-	customers, err := ch.CustomerService.FindAllByFullName(firstName, lastName, page, isNew)
+	customers, err := ch.CustomerService.FindAllByFullName(strings.ToLower(firstName), strings.ToLower(lastName), page, isNew)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
