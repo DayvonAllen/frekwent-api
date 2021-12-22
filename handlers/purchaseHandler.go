@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"freq/models"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,4 +50,22 @@ func (ph *PurchaseHandler) FindByPurchaseById(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": foundPurchase})
+}
+
+func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	purchase := new(models.Purchase)
+	err := c.BodyParser(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = ph.PurchaseService.Purchase(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }

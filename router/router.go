@@ -27,6 +27,7 @@ func SetupRoutes(app *fiber.App) {
 	auth.Post("/login", ah.Login)
 
 	product := api.Group("/products")
+	product.Post("/buy", ph.Purchase)
 	product.Get("/:id", prh.FindByProductId)
 	product.Get("", prh.FindAll)
 
@@ -52,7 +53,7 @@ func SetupRoutes(app *fiber.App) {
 	coupon.Delete("/code/:code", middleware.IsLoggedIn, ch.DeleteByCode)
 
 	ip := api.Group("/iriguchi/ip")
-	ip.Get("/ip/:ip", middleware.IsLoggedIn, ih.FindByIp)
+	ip.Get("/get/:ip", middleware.IsLoggedIn, ih.FindByIp)
 	ip.Get("", middleware.IsLoggedIn, ih.FindAll)
 
 	customer := api.Group("/iriguchi/customer")

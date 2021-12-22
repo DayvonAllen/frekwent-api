@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"freq/models"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
@@ -32,19 +31,13 @@ func (lh *LoginIpHandler) FindAll(c *fiber.Ctx) error {
 }
 
 func (lh *LoginIpHandler) FindByIp(c *fiber.Ctx) error {
-	c.Accepts("application/json")
-	ip := new(models.LoginIP)
-	err := c.BodyParser(ip)
+	ip := c.Params("ip")
+
+	foundIP, err := lh.LoginIpService.FindByIp(ip)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	foundCoupon, err := lh.LoginIpService.FindByIp(ip.IpAddress)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
-
-	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": foundCoupon})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": foundIP})
 }
