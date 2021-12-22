@@ -335,6 +335,22 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 	return nil
 }
 
+func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purchase, error) {
+	conn := database.ConnectToDB()
+
+	err := conn.PurchaseCollection.FindOne(context.TODO(), bson.D{{"purchaseConfirmationId", id}}).Decode(&p.purchase)
+
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return nil, err
+		}
+		return nil, fmt.Errorf("error processing data")
+	}
+
+	return &p.purchase, nil
+}
+
 func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
 	conn := database.ConnectToDB()
 

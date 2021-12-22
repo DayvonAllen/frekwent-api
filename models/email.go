@@ -12,6 +12,7 @@ type Email struct {
 	From      string             `bson:"from" json:"from"`
 	Content   string             `bson:"content" json:"content"`
 	Subject   string             `bson:"subject" json:"subject"`
+	Status    string             `bson:"status" json:"status"`
 	CreatedAt time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt time.Time          `bson:"updatedAt" json:"updatedAt"`
 }

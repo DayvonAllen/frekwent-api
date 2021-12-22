@@ -10,11 +10,11 @@ type ProductService interface {
 	Create(product *models.Product) error
 	FindAll(string, bool) (*[]models.Product, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
-	UpdateName(string, primitive.ObjectID) error
-	UpdateQuantity(uint16, primitive.ObjectID) error
-	UpdatePrice(string, primitive.ObjectID) error
-	UpdateDescription(string, primitive.ObjectID) error
-	UpdateIngredients(*[]string, primitive.ObjectID) error
+	UpdateName(string, primitive.ObjectID) (*models.Product, error)
+	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
+	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)
+	UpdateDescription(string, primitive.ObjectID) (*models.Product, error)
+	UpdateIngredients(*[]string, primitive.ObjectID) (*models.Product, error)
 	DeleteById(primitive.ObjectID) error
 }
 
@@ -52,54 +52,54 @@ func (p DefaultProductService) FindByProductId(id primitive.ObjectID) (*models.P
 	return product, nil
 }
 
-func (p DefaultProductService) UpdateName(name string, id primitive.ObjectID) error {
-	err := p.repo.UpdateName(name, id)
+func (p DefaultProductService) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdateName(name, id)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return product, nil
 }
 
-func (p DefaultProductService) UpdateQuantity(quan uint16, id primitive.ObjectID) error {
-	err := p.repo.UpdateQuantity(quan, id)
+func (p DefaultProductService) UpdateQuantity(quan uint16, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdateQuantity(quan, id)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return product, nil
 }
 
-func (p DefaultProductService) UpdatePrice(price string, id primitive.ObjectID) error {
-	err := p.repo.UpdatePrice(price, id)
+func (p DefaultProductService) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdatePrice(price, id)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return product, nil
 }
 
-func (p DefaultProductService) UpdateDescription(desc string, id primitive.ObjectID) error {
-	err := p.repo.UpdateDescription(desc, id)
+func (p DefaultProductService) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdateDescription(desc, id)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return product, nil
 }
 
-func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) error {
-	err := p.repo.UpdateIngredients(ingredients, id)
+func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdateIngredients(ingredients, id)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return product, nil
 }
 
 func (p DefaultProductService) DeleteById(id primitive.ObjectID) error {

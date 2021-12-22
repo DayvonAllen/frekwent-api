@@ -10,6 +10,7 @@ type PurchaseService interface {
 	Purchase(purchase *models.Purchase) error
 	FindAll(string, bool) (*[]models.Purchase, error)
 	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
+	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
 }
 
 type DefaultPurchaseService struct {
@@ -38,6 +39,16 @@ func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*[]models.P
 
 func (p DefaultPurchaseService) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
 	purchase, err := p.repo.FindByPurchaseById(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return purchase, nil
+}
+
+func (p DefaultPurchaseService) FindByPurchaseConfirmationId(id string) (*models.Purchase, error) {
+	purchase, err := p.repo.FindByPurchaseConfirmationId(id)
 
 	if err != nil {
 		return nil, err
