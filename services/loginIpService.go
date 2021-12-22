@@ -17,7 +17,7 @@ type DefaultLoginIpService struct {
 }
 
 func (l DefaultLoginIpService) Create(ip *models.LoginIP) error {
-	err := l.Create(ip)
+	err := l.repo.Create(ip)
 
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func (l DefaultLoginIpService) Create(ip *models.LoginIP) error {
 }
 
 func (l DefaultLoginIpService) FindAll(page string, newQuery bool) (*[]models.LoginIP, error) {
-	ips, err := l.FindAll(page, newQuery)
+	ips, err := l.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (l DefaultLoginIpService) FindAll(page string, newQuery bool) (*[]models.Lo
 }
 
 func (l DefaultLoginIpService) FindByIp(ip string) (*models.LoginIP, error) {
-	i, err := l.FindByIp(ip)
+	i, err := l.repo.FindByIp(ip)
 
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (l DefaultLoginIpService) FindByIp(ip string) (*models.LoginIP, error) {
 }
 
 func (l DefaultLoginIpService) UpdateIp(ip *models.LoginIP) error {
-	err := l.UpdateIp(ip)
+	err := l.repo.UpdateLoginIp(ip)
 
 	if err != nil {
 		return err

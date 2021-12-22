@@ -22,7 +22,7 @@ type CustomerRepoImpl struct {
 }
 
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	key := config.Config("KEY")
 
@@ -105,7 +105,7 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 }
 
 func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models.Customer, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10
@@ -212,7 +212,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 }
 
 func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*[]models.Customer, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10

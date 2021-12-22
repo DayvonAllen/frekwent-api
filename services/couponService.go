@@ -17,7 +17,7 @@ type DefaultCouponService struct {
 }
 
 func (c DefaultCouponService) Create(coupon *models.Coupon) error {
-	err := c.Create(coupon)
+	err := c.repo.Create(coupon)
 
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func (c DefaultCouponService) Create(coupon *models.Coupon) error {
 }
 
 func (c DefaultCouponService) FindAll(page string, newQuery bool) (*[]models.Coupon, error) {
-	coupons, err := c.FindAll(page, newQuery)
+	coupons, err := c.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (c DefaultCouponService) FindAll(page string, newQuery bool) (*[]models.Cou
 }
 
 func (c DefaultCouponService) FindByCode(code string) (*models.Coupon, error) {
-	coupon, err := c.FindByCode(code)
+	coupon, err := c.repo.FindByCode(code)
 
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (c DefaultCouponService) FindByCode(code string) (*models.Coupon, error) {
 }
 
 func (c DefaultCouponService) DeleteByCode(code string) error {
-	err := c.DeleteByCode(code)
+	err := c.repo.DeleteByCode(code)
 
 	if err != nil {
 		return err

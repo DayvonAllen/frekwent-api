@@ -7,7 +7,7 @@ import (
 )
 
 func IsLoggedIn(c *fiber.Ctx) error {
-	token := c.Get("Authorization")
+	token := c.Cookies("auth")
 
 	var auth util.Authentication
 	u, loggedIn, err := auth.IsLoggedIn(token)

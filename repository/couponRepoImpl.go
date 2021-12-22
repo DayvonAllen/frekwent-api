@@ -19,7 +19,7 @@ type CouponRepoImpl struct {
 }
 
 func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	coupon.Id = primitive.NewObjectID()
 	coupon.CreatedAt = time.Now()
@@ -35,7 +35,7 @@ func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
 }
 
 func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Coupon, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10
@@ -74,7 +74,7 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Cou
 }
 
 func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	err := conn.CouponCollection.FindOne(context.TODO(), bson.D{{"code", code}}).Decode(&c.Coupon)
 
@@ -90,7 +90,7 @@ func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
 }
 
 func (c CouponRepoImpl) DeleteByCode(code string) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	_, err := conn.CouponCollection.DeleteOne(context.TODO(), bson.D{{"code", code}})
 

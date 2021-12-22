@@ -20,9 +20,7 @@ type Connection struct {
 	*mongo.Database
 }
 
-var MongoConn *Connection
-
-func ConnectToDB() {
+func ConnectToDB() *Connection {
 	p := config.Config("DB_PORT")
 	n := config.Config("DB_NAME")
 	h := config.Config("DB_HOST")
@@ -59,5 +57,5 @@ func ConnectToDB() {
 		db,
 	}
 
-	MongoConn = dbConnection
+	return dbConnection
 }

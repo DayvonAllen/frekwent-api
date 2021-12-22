@@ -22,7 +22,7 @@ func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
 	_, err := l.FindByIp(ip.IpAddress)
 
 	if err != nil {
-		conn := database.MongoConn
+		conn := database.ConnectToDB()
 
 		ip.Id = primitive.NewObjectID()
 		ip.AccessedAt = time.Now()
@@ -46,7 +46,7 @@ func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
 }
 
 func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.LoginIP, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10
@@ -85,7 +85,7 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Log
 }
 
 func (l LoginIpRepoImpl) FindByIp(ip string) (*models.LoginIP, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	err := conn.LoginIPCollection.FindOne(context.TODO(), bson.D{{"ipAddress", ip}}).Decode(&l.loginIp)
 
@@ -101,7 +101,7 @@ func (l LoginIpRepoImpl) FindByIp(ip string) (*models.LoginIP, error) {
 }
 
 func (l LoginIpRepoImpl) UpdateLoginIp(ip *models.LoginIP) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	ip.AccessedAt = time.Now()
 	ip.UpdatedAt = time.Now()

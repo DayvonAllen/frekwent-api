@@ -6,7 +6,7 @@ import (
 )
 
 type Customer struct {
-	Id              primitive.ObjectID `bson:"_id" json:"_"`
+	Id              primitive.ObjectID `bson:"_id" json:"id"`
 	FirstName       string             `bson:"firstName" json:"firstName"`
 	LastName        string             `bson:"lastName" json:"lastName"`
 	Email           string             `bson:"email" json:"email"`

@@ -17,7 +17,7 @@ type DefaultPurchaseService struct {
 }
 
 func (p DefaultPurchaseService) Purchase(purchase *models.Purchase) error {
-	err := p.Purchase(purchase)
+	err := p.repo.Purchase(purchase)
 
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func (p DefaultPurchaseService) Purchase(purchase *models.Purchase) error {
 }
 
 func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*[]models.Purchase, error) {
-	purchases, err := p.FindAll(page, newQuery)
+	purchases, err := p.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*[]models.P
 }
 
 func (p DefaultPurchaseService) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
-	purchase, err := p.FindByPurchaseById(id)
+	purchase, err := p.repo.FindByPurchaseById(id)
 
 	if err != nil {
 		return nil, err

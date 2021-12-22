@@ -19,7 +19,7 @@ type DefaultProductService struct {
 }
 
 func (p DefaultProductService) Create(product *models.Product) error {
-	err := p.Create(product)
+	err := p.repo.Create(product)
 
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (p DefaultProductService) Create(product *models.Product) error {
 }
 
 func (p DefaultProductService) FindAll(page string, newQuery bool) (*[]models.Product, error) {
-	products, err := p.FindAll(page, newQuery)
+	products, err := p.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (p DefaultProductService) FindAll(page string, newQuery bool) (*[]models.Pr
 }
 
 func (p DefaultProductService) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
-	product, err := p.FindByProductId(id)
+	product, err := p.repo.FindByProductId(id)
 
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (p DefaultProductService) FindByProductId(id primitive.ObjectID) (*models.P
 }
 
 func (p DefaultProductService) UpdateById(product *models.Product) error {
-	err := p.UpdateById(product)
+	err := p.repo.UpdateById(product)
 
 	if err != nil {
 		return err

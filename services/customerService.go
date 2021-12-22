@@ -16,7 +16,7 @@ type DefaultCustomerService struct {
 }
 
 func (c DefaultCustomerService) Create(customer *models.Customer) error {
-	err := c.Create(customer)
+	err := c.repo.Create(customer)
 
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (c DefaultCustomerService) Create(customer *models.Customer) error {
 }
 
 func (c DefaultCustomerService) FindAll(page string, newQuery bool) (*[]models.Customer, error) {
-	ips, err := c.FindAll(page, newQuery)
+	ips, err := c.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (c DefaultCustomerService) FindAll(page string, newQuery bool) (*[]models.C
 
 func (c DefaultCustomerService) FindAllByFullName(firstName string, lastName string,
 	page string, newQuery bool) (*[]models.Customer, error) {
-	ips, err := c.FindAllByFullName(firstName, lastName, page, newQuery)
+	ips, err := c.repo.FindAllByFullName(firstName, lastName, page, newQuery)
 
 	if err != nil {
 		return nil, err

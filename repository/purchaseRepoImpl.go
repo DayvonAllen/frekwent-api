@@ -22,7 +22,7 @@ type PurchaseRepoImpl struct {
 }
 
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	key := config.Config("KEY")
 
@@ -145,7 +145,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 }
 
 func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models.Purchase, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10
@@ -184,7 +184,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	key := config.Config("KEY")
 
@@ -300,7 +300,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 }
 
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	opts := options.FindOneAndUpdate().SetUpsert(true)
 	filter := bson.D{{"_id", dto.Id}}
@@ -314,7 +314,7 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 }
 
 func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	opts := options.FindOneAndUpdate().SetUpsert(true)
 	filter := bson.D{{"_id", dto.Id}}
@@ -327,7 +327,7 @@ func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO
 }
 
 func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	key := config.Config("KEY")
 
@@ -411,7 +411,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 }
 
 func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	opts := options.FindOneAndUpdate().SetUpsert(true)
 	filter := bson.D{{"_id", dto.Id}}

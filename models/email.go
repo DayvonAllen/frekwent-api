@@ -6,7 +6,7 @@ import (
 )
 
 type Email struct {
-	Id        primitive.ObjectID `bson:"_id" json:"_"`
+	Id        primitive.ObjectID `bson:"_id" json:"id"`
 	Type      string             `bson:"type" json:"type"`
 	To        string             `bson:"to" json:"to"`
 	From      string             `bson:"from" json:"from"`

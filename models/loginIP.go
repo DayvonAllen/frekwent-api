@@ -6,7 +6,7 @@ import (
 )
 
 type LoginIP struct {
-	Id         primitive.ObjectID `bson:"_id" json:"_"`
+	Id         primitive.ObjectID `bson:"_id" json:"id"`
 	IpAddress  string             `bson:"ipAddress" json:"ipAddress"`
 	AccessedAt time.Time          `bson:"accessedAt" json:"accessedAt"`
 	CreatedAt  time.Time          `bson:"createdAt" json:"-"`

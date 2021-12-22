@@ -6,7 +6,7 @@ import (
 )
 
 type Coupon struct {
-	Id             primitive.ObjectID `bson:"_id" json:"_"`
+	Id             primitive.ObjectID `bson:"_id" json:"id"`
 	Percentage     float32            `bson:"percentage" json:"percentage"`
 	Code           string             `bson:"code" json:"code"`
 	ExpirationDate time.Time          `bson:"expirationDate" json:"expirationDate"`

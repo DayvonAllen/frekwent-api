@@ -19,7 +19,7 @@ type ProductRepoImpl struct {
 }
 
 func (p ProductRepoImpl) Create(product *models.Product) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	product.Id = primitive.NewObjectID()
 	product.CreatedAt = time.Now()
@@ -35,7 +35,7 @@ func (p ProductRepoImpl) Create(product *models.Product) error {
 }
 
 func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.Product, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
 	perPage := 10
@@ -58,7 +58,7 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.P
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), p.products); err != nil {
+	if err = cur.All(context.TODO(), &p.products); err != nil {
 		panic(err)
 	}
 
@@ -74,7 +74,7 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.P
 }
 
 func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&p.product)
 
@@ -90,7 +90,7 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 }
 
 func (p ProductRepoImpl) UpdateById(product *models.Product) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	product.UpdatedAt = time.Now()
 
@@ -108,7 +108,7 @@ func (p ProductRepoImpl) UpdateById(product *models.Product) error {
 }
 
 func (p ProductRepoImpl) DeleteById(id primitive.ObjectID) error {
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	_, err := conn.ProductCollection.DeleteOne(context.TODO(), bson.D{{"_id", id}})
 

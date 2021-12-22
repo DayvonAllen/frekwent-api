@@ -18,7 +18,7 @@ type AuthRepoImpl struct {
 func (a AuthRepoImpl) Login(username string, password string, ip string) (*models.User, string, error) {
 	var login util.Authentication
 
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	if helper.IsEmail(username) {
 		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"email",

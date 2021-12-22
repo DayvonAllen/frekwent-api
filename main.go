@@ -17,9 +17,8 @@ import (
 )
 
 func init() {
-	database.ConnectToDB()
 
-	conn := database.MongoConn
+	conn := database.ConnectToDB()
 
 	user := new(models.User)
 	err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"email", "admin@admin.com"}}).Decode(user)
