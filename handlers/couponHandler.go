@@ -6,6 +6,8 @@ import (
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type CouponHandler struct {
@@ -21,6 +23,9 @@ func (lh *CouponHandler) Create(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
+	coupon.ExpirationDate = time.Now().Add(24 * time.Hour)
+
+	coupon.Code = strings.ToLower(coupon.Code)
 	err = lh.CouponService.Create(coupon)
 
 	if err != nil {
@@ -46,41 +51,33 @@ func (lh *CouponHandler) FindAll(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": coupons})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": coupons})
 }
 
 func (lh *CouponHandler) FindByCode(c *fiber.Ctx) error {
-	c.Accepts("application/json")
-	coupon := new(models.Coupon)
-	err := c.BodyParser(coupon)
+	code := c.Params("code")
+
+	code = strings.ToLower(code)
+
+	foundCoupon, err := lh.CouponService.FindByCode(code)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	foundCoupon, err := lh.CouponService.FindByCode(coupon.Code)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
-
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": foundCoupon})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": foundCoupon})
 }
 
 func (lh *CouponHandler) DeleteByCode(c *fiber.Ctx) error {
-	c.Accepts("application/json")
-	coupon := new(models.Coupon)
-	err := c.BodyParser(coupon)
+	code := c.Params("code")
+
+	code = strings.ToLower(code)
+
+	err := lh.CouponService.DeleteByCode(code)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	err = lh.CouponService.DeleteByCode(coupon.Code)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
-
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }

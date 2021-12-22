@@ -28,7 +28,7 @@ func (ph *PurchaseHandler) FindAll(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": ips})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": ips})
 }
 
 func (ph *PurchaseHandler) FindByPurchaseById(c *fiber.Ctx) error {
@@ -48,5 +48,5 @@ func (ph *PurchaseHandler) FindByPurchaseById(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": foundPurchase})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": foundPurchase})
 }

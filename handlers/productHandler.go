@@ -47,7 +47,7 @@ func (ph *ProductHandler) FindAll(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": products})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": products})
 }
 
 func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
@@ -65,7 +65,7 @@ func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
 }
 
 func (ph *ProductHandler) UpdateName(c *fiber.Ctx) error {
@@ -91,7 +91,7 @@ func (ph *ProductHandler) UpdateName(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
 
 func (ph *ProductHandler) UpdatePrice(c *fiber.Ctx) error {
@@ -117,7 +117,7 @@ func (ph *ProductHandler) UpdatePrice(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
 
 func (ph *ProductHandler) UpdateDescription(c *fiber.Ctx) error {
@@ -143,7 +143,7 @@ func (ph *ProductHandler) UpdateDescription(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
 
 func (ph *ProductHandler) UpdateQuantity(c *fiber.Ctx) error {
@@ -169,7 +169,7 @@ func (ph *ProductHandler) UpdateQuantity(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
 
 func (ph *ProductHandler) UpdateIngredients(c *fiber.Ctx) error {
@@ -195,7 +195,7 @@ func (ph *ProductHandler) UpdateIngredients(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }
 
 func (ph *ProductHandler) DeleteById(c *fiber.Ctx) error {
@@ -213,5 +213,5 @@ func (ph *ProductHandler) DeleteById(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
 }

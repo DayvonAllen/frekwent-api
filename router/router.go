@@ -48,15 +48,15 @@ func SetupRoutes(app *fiber.App) {
 	coupon := api.Group("/iriguchi/coupon")
 	coupon.Post("", middleware.IsLoggedIn, ch.Create)
 	coupon.Get("", middleware.IsLoggedIn, ch.FindAll)
-	coupon.Post("", middleware.IsLoggedIn, ch.FindByCode)
-	coupon.Delete("", middleware.IsLoggedIn, ch.DeleteByCode)
+	coupon.Get("/code/:code", middleware.IsLoggedIn, ch.FindByCode)
+	coupon.Delete("/code/:code", middleware.IsLoggedIn, ch.DeleteByCode)
 
 	ip := api.Group("/iriguchi/ip")
-	ip.Post("", middleware.IsLoggedIn, ih.FindByIp)
+	ip.Get("/ip/:ip", middleware.IsLoggedIn, ih.FindByIp)
 	ip.Get("", middleware.IsLoggedIn, ih.FindAll)
 
 	customer := api.Group("/iriguchi/customer")
-	customer.Post("", middleware.IsLoggedIn, crh.FindAllByFullName)
+	customer.Get("/name", middleware.IsLoggedIn, crh.FindAllByFullName)
 	customer.Get("", middleware.IsLoggedIn, crh.FindAll)
 }
 
