@@ -25,6 +25,7 @@ func SetupRoutes(app *fiber.App) {
 
 	auth := api.Group("/iriguchi/auth")
 	auth.Post("/login", ah.Login)
+	auth.Get("/logout", ah.Logout)
 
 	product := api.Group("/products")
 	product.Post("/buy", ph.Purchase)

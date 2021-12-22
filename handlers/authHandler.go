@@ -63,3 +63,14 @@ func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": user})
 }
+
+func (ah *AuthHandler) Logout(c *fiber.Ctx) error {
+	c.Cookie(&fiber.Cookie{
+		Name: "auth",
+		// Set expiry date to the past
+		Expires:  time.Now().Add(-(time.Hour * 2)),
+		HTTPOnly: true,
+	})
+	
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+}
