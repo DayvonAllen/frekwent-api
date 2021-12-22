@@ -17,8 +17,8 @@ import (
 )
 
 type CustomerRepoImpl struct {
-	customer  *models.Customer
-	customers *[]models.Customer
+	customer  models.Customer
+	customers []models.Customer
 }
 
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
@@ -145,7 +145,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 
 	encrypt := helper.Encryption{Key: []byte(key)}
 
-	for _, customer := range *c.customers {
+	for _, customer := range c.customers {
 		wg.Add(5)
 		go func() {
 			defer wg.Done()
@@ -208,7 +208,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 		wg.Wait()
 	}
 
-	return c.customers, nil
+	return &c.customers, nil
 }
 
 func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*[]models.Customer, error) {
@@ -248,7 +248,7 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		}
 	}(cur, context.TODO())
 
-	return c.customers, nil
+	return &c.customers, nil
 }
 
 func NewCustomerRepoImpl() CustomerRepoImpl {

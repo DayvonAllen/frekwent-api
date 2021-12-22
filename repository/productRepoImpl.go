@@ -14,8 +14,8 @@ import (
 )
 
 type ProductRepoImpl struct {
-	product  *models.Product
-	products *[]models.Product
+	product  models.Product
+	products []models.Product
 }
 
 func (p ProductRepoImpl) Create(product *models.Product) error {
@@ -70,13 +70,13 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.P
 		}
 	}(cur, context.TODO())
 
-	return p.products, nil
+	return &p.products, nil
 }
 
 func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
 	conn := database.MongoConn
 
-	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(p.product)
+	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&p.product)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -86,7 +86,7 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 		return nil, fmt.Errorf("error processing data")
 	}
 
-	return p.product, nil
+	return &p.product, nil
 }
 
 func (p ProductRepoImpl) UpdateById(product *models.Product) error {

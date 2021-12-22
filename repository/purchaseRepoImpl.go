@@ -17,8 +17,8 @@ import (
 )
 
 type PurchaseRepoImpl struct {
-	purchase  *models.Purchase
-	purchases *[]models.Purchase
+	purchase  models.Purchase
+	purchases []models.Purchase
 }
 
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
@@ -180,7 +180,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models
 		}
 	}(cur, context.TODO())
 
-	return p.purchases, nil
+	return &p.purchases, nil
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
@@ -190,7 +190,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 
 	decrypt := helper.Encryption{Key: []byte(key)}
 
-	err := conn.PurchaseCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(p.purchase)
+	err := conn.PurchaseCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&p.purchase)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
@@ -296,7 +296,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 
 	wg.Wait()
 
-	return p.purchase, nil
+	return &p.purchase, nil
 }
 
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
@@ -307,12 +307,8 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 	update := bson.D{{"$set", bson.D{{"shipped", dto.Shipped},
 		{"trackingId", dto.TrackingId}}}}
 
-	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(p.purchase)
-
-	if err != nil {
-		return err
-	}
+	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
 	return nil
 }
@@ -324,12 +320,8 @@ func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"delivered", dto.Delivered}}}}
 
-	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(p.purchase)
-
-	if err != nil {
-		return err
-	}
+	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
 	return nil
 }
@@ -412,12 +404,8 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		{"state", dto.State},
 		{"zipCode", dto.ZipCode}}}}
 
-	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(p.purchase)
-
-	if err != nil {
-		return err
-	}
+	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
 	return nil
 }
@@ -429,12 +417,8 @@ func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) 
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"trackingId", dto.TrackingId}}}}
 
-	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(p.purchase)
-
-	if err != nil {
-		return err
-	}
+	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
 	return nil
 }
