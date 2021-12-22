@@ -89,20 +89,72 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) UpdateById(product *models.Product) error {
+func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) error {
 	conn := database.ConnectToDB()
 
-	product.UpdatedAt = time.Now()
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"name", name},
+		{"updatedAt", time.Now()}}}}
 
-	_, err := conn.ProductCollection.UpdateByID(context.TODO(), product.Id, product)
+	conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
-	if err != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
-			return err
-		}
-		return fmt.Errorf("error processing data")
-	}
+	return nil
+}
+
+func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) error {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"quantity", quantity},
+		{"updatedAt", time.Now()}}}}
+
+	conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
+
+	return nil
+}
+
+func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) error {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"price", price},
+		{"updatedAt", time.Now()}}}}
+
+	conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
+
+	return nil
+}
+
+func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) error {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"description", desc},
+		{"updatedAt", time.Now()}}}}
+
+	conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
+
+	return nil
+}
+
+func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) error {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate().SetUpsert(true)
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"ingredients", ingredients},
+		{"updatedAt", time.Now()}}}}
+
+	conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts)
 
 	return nil
 }

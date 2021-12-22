@@ -16,3 +16,22 @@ type Product struct {
 	CreatedAt   time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt   time.Time          `bson:"updatedAt" json:"-"`
 }
+type ProductNameDto struct {
+	Name string `bson:"name" json:"name" validate:"max=60,min=1"`
+}
+
+type ProductPriceDto struct {
+	Price string `bson:"price" json:"price"`
+}
+
+type ProductQuantityDto struct {
+	Quantity uint16 `bson:"quantity" json:"quantity"`
+}
+
+type ProductDescriptionDto struct {
+	Description string `bson:"description" json:"description" validate:"max=450,min=1"`
+}
+
+type ProductIngredientsDto struct {
+	Ingredients *[]string `bson:"ingredients" json:"ingredients"`
+}
