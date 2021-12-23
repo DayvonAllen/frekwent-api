@@ -51,6 +51,10 @@ func init() {
 	//if err != nil {
 	//	return
 	//}
+	//_, err = conn.EmailCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
 }
 
 func main() {
