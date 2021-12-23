@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"freq/database"
 	"freq/models"
@@ -22,17 +23,27 @@ type ProductRepoImpl struct {
 func (p ProductRepoImpl) Create(product *models.Product) error {
 	conn := database.ConnectToDB()
 
-	product.Id = primitive.NewObjectID()
-	product.CreatedAt = time.Now()
-	product.UpdatedAt = time.Now()
-
-	_, err := conn.ProductCollection.InsertOne(context.TODO(), product)
+	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"name", product.Name}}).Decode(&p.product)
 
 	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			product.Id = primitive.NewObjectID()
+			product.CreatedAt = time.Now()
+			product.UpdatedAt = time.Now()
+
+			_, err := conn.ProductCollection.InsertOne(context.TODO(), product)
+
+			if err != nil {
+				return fmt.Errorf("error processing data")
+			}
+
+			return nil
+		}
 		return fmt.Errorf("error processing data")
 	}
 
-	return nil
+	return errors.New("product with that name already exists")
 }
 
 func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.ProductList, error) {

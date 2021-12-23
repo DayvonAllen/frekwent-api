@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"freq/database"
 	"freq/models"
@@ -22,17 +23,27 @@ type CouponRepoImpl struct {
 func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
 	conn := database.ConnectToDB()
 
-	coupon.Id = primitive.NewObjectID()
-	coupon.CreatedAt = time.Now()
-	coupon.UpdatedAt = time.Now()
-
-	_, err := conn.CouponCollection.InsertOne(context.TODO(), coupon)
+	_, err := c.FindByCode(coupon.Code)
 
 	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			coupon.Id = primitive.NewObjectID()
+			coupon.CreatedAt = time.Now()
+			coupon.UpdatedAt = time.Now()
+
+			_, err = conn.CouponCollection.InsertOne(context.TODO(), coupon)
+
+			if err != nil {
+				return fmt.Errorf("error processing data")
+			}
+
+			return nil
+		}
 		return fmt.Errorf("error processing data")
 	}
 
-	return nil
+	return errors.New("coupon already exists")
 }
 
 func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.CouponList, error) {
