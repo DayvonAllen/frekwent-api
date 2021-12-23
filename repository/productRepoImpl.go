@@ -14,8 +14,9 @@ import (
 )
 
 type ProductRepoImpl struct {
-	product  models.Product
-	products []models.Product
+	product     models.Product
+	products    []models.Product
+	productList models.ProductList
 }
 
 func (p ProductRepoImpl) Create(product *models.Product) error {
@@ -34,7 +35,7 @@ func (p ProductRepoImpl) Create(product *models.Product) error {
 	return nil
 }
 
-func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.Product, error) {
+func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.ProductList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -70,7 +71,24 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*[]models.P
 		}
 	}(cur, context.TODO())
 
-	return &p.products, nil
+	count, err := conn.ProductCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	p.productList.NumberOfProducts = count
+
+	if p.productList.NumberOfProducts < 10 {
+		p.productList.NumberOfPages = 1
+	} else {
+		p.productList.NumberOfPages = int(count/10) + 1
+	}
+
+	p.productList.Products = &p.products
+	p.productList.CurrentPage = pageNumber
+
+	return &p.productList, nil
 }
 
 func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product, error) {

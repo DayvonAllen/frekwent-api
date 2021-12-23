@@ -7,7 +7,7 @@ import (
 
 type ProductRepo interface {
 	Create(product *models.Product) error
-	FindAll(string, bool) (*[]models.Product, error)
+	FindAll(string, bool) (*models.ProductList, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)

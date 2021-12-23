@@ -8,7 +8,7 @@ import (
 
 type ProductService interface {
 	Create(product *models.Product) error
-	FindAll(string, bool) (*[]models.Product, error)
+	FindAll(string, bool) (*models.ProductList, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
@@ -32,7 +32,7 @@ func (p DefaultProductService) Create(product *models.Product) error {
 	return nil
 }
 
-func (p DefaultProductService) FindAll(page string, newQuery bool) (*[]models.Product, error) {
+func (p DefaultProductService) FindAll(page string, newQuery bool) (*models.ProductList, error) {
 	products, err := p.repo.FindAll(page, newQuery)
 
 	if err != nil {

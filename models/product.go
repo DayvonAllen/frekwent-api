@@ -35,3 +35,10 @@ type ProductDescriptionDto struct {
 type ProductIngredientsDto struct {
 	Ingredients *[]string `bson:"ingredients" json:"ingredients"`
 }
+
+type ProductList struct {
+	Products         *[]Product `json:"products"`
+	NumberOfProducts int64      `json:"numberOfProducts"`
+	CurrentPage      int        `json:"currentPage"`
+	NumberOfPages    int        `json:"numberOfPages"`
+}
