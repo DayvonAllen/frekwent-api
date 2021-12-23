@@ -13,3 +13,10 @@ type Coupon struct {
 	CreatedAt      time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt      time.Time          `bson:"updatedAt" json:"-"`
 }
+
+type CouponList struct {
+	Coupons         *[]Coupon `json:"coupons"`
+	NumberOfCoupons int64     `json:"numberOfCoupons"`
+	CurrentPage     int       `json:"currentPage"`
+	NumberOfPages   int       `json:"numberOfPages"`
+}

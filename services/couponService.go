@@ -7,7 +7,7 @@ import (
 
 type CouponService interface {
 	Create(coupon *models.Coupon) error
-	FindAll(string, bool) (*[]models.Coupon, error)
+	FindAll(string, bool) (*models.CouponList, error)
 	FindByCode(string) (*models.Coupon, error)
 	DeleteByCode(string) error
 }
@@ -26,7 +26,7 @@ func (c DefaultCouponService) Create(coupon *models.Coupon) error {
 	return nil
 }
 
-func (c DefaultCouponService) FindAll(page string, newQuery bool) (*[]models.Coupon, error) {
+func (c DefaultCouponService) FindAll(page string, newQuery bool) (*models.CouponList, error) {
 	coupons, err := c.repo.FindAll(page, newQuery)
 
 	if err != nil {

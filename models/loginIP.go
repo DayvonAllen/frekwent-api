@@ -12,3 +12,10 @@ type LoginIP struct {
 	CreatedAt  time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt  time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
+
+type LoginIpList struct {
+	LoginIps         *[]LoginIP `json:"loginIps"`
+	NumberOfLoginIps int64      `json:"numberOfLoginIps"`
+	CurrentPage      int        `json:"currentPage"`
+	NumberOfPages    int        `json:"numberOfPages"`
+}

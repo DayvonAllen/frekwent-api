@@ -14,8 +14,9 @@ import (
 )
 
 type CouponRepoImpl struct {
-	Coupon  models.Coupon
-	Coupons []models.Coupon
+	Coupon     models.Coupon
+	Coupons    []models.Coupon
+	CouponList models.CouponList
 }
 
 func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
@@ -34,7 +35,7 @@ func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
 	return nil
 }
 
-func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Coupon, error) {
+func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.CouponList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -70,7 +71,24 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*[]models.Cou
 		}
 	}(cur, context.TODO())
 
-	return &c.Coupons, nil
+	count, err := conn.CouponCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	c.CouponList.NumberOfCoupons = count
+
+	if c.CouponList.NumberOfCoupons < 10 {
+		c.CouponList.NumberOfPages = 1
+	} else {
+		c.CouponList.NumberOfPages = int(count/10) + 1
+	}
+
+	c.CouponList.Coupons = &c.Coupons
+	c.CouponList.CurrentPage = pageNumber
+
+	return &c.CouponList, nil
 }
 
 func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {

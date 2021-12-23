@@ -14,8 +14,9 @@ import (
 )
 
 type LoginIpRepoImpl struct {
-	loginIp  models.LoginIP
-	loginIps []models.LoginIP
+	loginIp     models.LoginIP
+	loginIps    []models.LoginIP
+	loginIpList models.LoginIpList
 }
 
 func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
@@ -45,7 +46,7 @@ func (l LoginIpRepoImpl) Create(ip *models.LoginIP) error {
 	return nil
 }
 
-func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.LoginIP, error) {
+func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*models.LoginIpList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -81,7 +82,24 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*[]models.Log
 		}
 	}(cur, context.TODO())
 
-	return &l.loginIps, nil
+	count, err := conn.LoginIPCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	l.loginIpList.NumberOfLoginIps = count
+
+	if l.loginIpList.NumberOfLoginIps < 10 {
+		l.loginIpList.NumberOfPages = 1
+	} else {
+		l.loginIpList.NumberOfPages = int(count/10) + 1
+	}
+
+	l.loginIpList.LoginIps = &l.loginIps
+	l.loginIpList.CurrentPage = pageNumber
+
+	return &l.loginIpList, nil
 }
 
 func (l LoginIpRepoImpl) FindByIp(ip string) (*models.LoginIP, error) {

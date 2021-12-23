@@ -7,7 +7,7 @@ import (
 
 type LoginIpService interface {
 	Create(ip *models.LoginIP) error
-	FindAll(string, bool) (*[]models.LoginIP, error)
+	FindAll(string, bool) (*models.LoginIpList, error)
 	FindByIp(string) (*models.LoginIP, error)
 	UpdateIp(ip *models.LoginIP) error
 }
@@ -26,7 +26,7 @@ func (l DefaultLoginIpService) Create(ip *models.LoginIP) error {
 	return nil
 }
 
-func (l DefaultLoginIpService) FindAll(page string, newQuery bool) (*[]models.LoginIP, error) {
+func (l DefaultLoginIpService) FindAll(page string, newQuery bool) (*models.LoginIpList, error) {
 	ips, err := l.repo.FindAll(page, newQuery)
 
 	if err != nil {
