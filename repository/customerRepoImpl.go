@@ -23,9 +23,23 @@ type CustomerRepoImpl struct {
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 	conn := database.ConnectToDB()
 
-	_, err := conn.CustomerCollection.InsertOne(context.TODO(), customer)
+	err := conn.CustomerCollection.FindOne(context.TODO(), bson.D{
+		{"firstName", customer.FirstName},
+		{"lastName", customer.LastName},
+		{"email", customer.Email},
+	}).Decode(&c.customer)
 
 	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			_, err = conn.CustomerCollection.InsertOne(context.TODO(), customer)
+
+			if err != nil {
+				return fmt.Errorf("error processing data")
+			}
+
+			return nil
+		}
 		return fmt.Errorf("error processing data")
 	}
 
