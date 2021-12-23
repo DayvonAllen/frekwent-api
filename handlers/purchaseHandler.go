@@ -57,23 +57,11 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 	purchase := new(models.Purchase)
 	err := c.BodyParser(purchase)
-
-	items := purchase.PurchasedItems
-
+	
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	for _, items := range *items {
-		price, err := strconv.ParseInt(items.Price, 10, 16)
-
-		if err != nil {
-			panic(err)
-		}
-		purchase.FinalPrice = int16(price) + purchase.FinalPrice
-	}
-
-	purchase.FinalPrice = purchase.FinalPrice + purchase.Tax
 	purchase.Id = primitive.NewObjectID()
 
 	purchase.FirstName = strings.ToLower(purchase.FirstName)
