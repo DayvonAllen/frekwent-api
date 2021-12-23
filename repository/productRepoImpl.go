@@ -74,6 +74,10 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.Pro
 		panic(err)
 	}
 
+	if p.products == nil {
+		return nil, errors.New("no products in the database")
+	}
+
 	// Close the cursor once finished
 	defer func(cur *mongo.Cursor, ctx context.Context) {
 		err := cur.Close(ctx)

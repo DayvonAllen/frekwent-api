@@ -18,6 +18,7 @@ func SetupRoutes(app *fiber.App) {
 	crh := handlers.CustomerHandler{CustomerService: services.NewCustomerService(repository.NewCustomerRepoImpl())}
 	ph := handlers.PurchaseHandler{PurchaseService: services.NewPurchaseService(repository.NewPurchaseRepoImpl())}
 	prh := handlers.ProductHandler{ProductService: services.NewProductService(repository.NewProductRepoImpl())}
+	eh := handlers.EmailHandler{EmailService: services.NewEmailService(repository.NewEmailRepoImpl())}
 
 	app.Use(recover.New())
 
@@ -50,7 +51,9 @@ func SetupRoutes(app *fiber.App) {
 	items.Delete("/delete/:id", middleware.IsLoggedIn, prh.DeleteById)
 	items.Post("", middleware.IsLoggedIn, prh.Create)
 
-	_ = api.Group("/iriguchi/email")
+	email := api.Group("/iriguchi/email")
+	email.Get("/get/:email", middleware.IsLoggedIn, eh.FindAllByEmail)
+	email.Get("", middleware.IsLoggedIn, eh.FindAll)
 
 	coupon := api.Group("/iriguchi/coupon")
 	coupon.Post("", middleware.IsLoggedIn, ch.Create)

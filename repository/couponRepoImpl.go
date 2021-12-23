@@ -74,6 +74,10 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.Coupo
 		panic(err)
 	}
 
+	if c.Coupons == nil {
+		return nil, errors.New("no coupons found")
+	}
+
 	// Close the cursor once finished
 	defer func(cur *mongo.Cursor, ctx context.Context) {
 		err := cur.Close(ctx)

@@ -128,7 +128,7 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 	encrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(6)
+	wg.Add(7)
 
 	go func() {
 		defer wg.Done()
@@ -139,6 +139,17 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 		purchase.TrackingId = ""
 		purchase.CreatedAt = time.Now()
 		purchase.UpdatedAt = time.Now()
+	}()
+
+	go func() {
+		defer wg.Done()
+		pi, err := encrypt.Encrypt(purchase.Email)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.Email = pi
 	}()
 
 	go func() {
@@ -210,7 +221,18 @@ func DecryptPI(purchase *models.Purchase) *models.Purchase {
 	decrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(6)
+
+	go func() {
+		defer wg.Done()
+		pi, err := decrypt.Decrypt(purchase.Email)
+
+		if err != nil {
+			panic(err)
+		}
+
+		purchase.Email = pi
+	}()
 
 	go func() {
 		defer wg.Done()

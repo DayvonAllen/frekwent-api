@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"freq/config"
 	"freq/database"
@@ -84,6 +85,10 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 
 	if err = cur.All(context.TODO(), &p.purchases); err != nil {
 		panic(err)
+	}
+
+	if p.purchases == nil {
+		return nil, errors.New("no purchases in the database")
 	}
 
 	// Close the cursor once finished

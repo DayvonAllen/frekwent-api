@@ -16,3 +16,14 @@ type Email struct {
 	CreatedAt time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
+
+type EmailDto struct {
+	Email string `json:"email"`
+}
+
+type EmailList struct {
+	Emails         *[]Email `json:"emails"`
+	NumberOfEmails int64    `json:"numberOfEmails"`
+	CurrentPage    int      `json:"currentPage"`
+	NumberOfPages  int      `json:"numberOfPages"`
+}

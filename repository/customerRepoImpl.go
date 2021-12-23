@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"freq/config"
 	"freq/database"
@@ -74,6 +75,10 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 		panic(err)
 	}
 
+	if c.customers == nil {
+		return nil, errors.New("no customers found")
+	}
+
 	// Close the cursor once finished
 	defer func(cur *mongo.Cursor, ctx context.Context) {
 		err := cur.Close(ctx)
@@ -90,7 +95,18 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
-		wg.Add(5)
+		wg.Add(6)
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.Email)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.Email = pi
+		}()
+
 		go func() {
 			defer wg.Done()
 			pi, err := encrypt.Decrypt(customer.StreetAddress)
@@ -201,6 +217,10 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		panic(err)
 	}
 
+	if c.customers == nil {
+		return nil, errors.New(fmt.Sprintf("No customer found with the first name: %s and last name: %s", firstName, lastName))
+	}
+
 	// Close the cursor once finished
 	defer func(cur *mongo.Cursor, ctx context.Context) {
 		err := cur.Close(ctx)
@@ -217,7 +237,18 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
-		wg.Add(5)
+		wg.Add(6)
+		go func() {
+			defer wg.Done()
+			pi, err := encrypt.Decrypt(customer.Email)
+
+			if err != nil {
+				panic(err)
+			}
+
+			customer.Email = pi
+		}()
+
 		go func() {
 			defer wg.Done()
 			pi, err := encrypt.Decrypt(customer.StreetAddress)

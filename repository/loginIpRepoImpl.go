@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"freq/database"
 	"freq/models"
@@ -61,7 +62,7 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*models.Login
 	findOptions.SetLimit(int64(perPage))
 
 	if newLoginQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		findOptions.SetSort(bson.D{{"updatedAt", -1}})
 	}
 
 	cur, err := conn.LoginIPCollection.Find(context.TODO(), bson.M{}, &findOptions)
@@ -72,6 +73,10 @@ func (l LoginIpRepoImpl) FindAll(page string, newLoginQuery bool) (*models.Login
 
 	if err = cur.All(context.TODO(), &l.loginIps); err != nil {
 		panic(err)
+	}
+
+	if l.loginIps == nil {
+		return nil, errors.New("no ips in the database")
 	}
 
 	// Close the cursor once finished

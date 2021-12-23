@@ -41,6 +41,16 @@ func init() {
 			}
 		}
 	}
+
+	//_, err = conn.PurchaseCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
+	//
+	//_, err = conn.CustomerCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
 }
 
 func main() {
