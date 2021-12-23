@@ -20,3 +20,10 @@ type Customer struct {
 	CreatedAt       time.Time          `bson:"createdAt" json:"-"`
 	UpdatedAt       time.Time          `bson:"updatedAt" json:"-"`
 }
+
+type CustomerList struct {
+	Customers         *[]Customer `json:"customers"`
+	NumberOfCustomers int64       `json:"numberOfCustomers"`
+	CurrentPage       int         `json:"currentPage"`
+	NumberOfPages     int         `json:"numberOfPages"`
+}

@@ -15,8 +15,9 @@ import (
 )
 
 type CustomerRepoImpl struct {
-	customer  models.Customer
-	customers []models.Customer
+	customer     models.Customer
+	customers    []models.Customer
+	customerList models.CustomerList
 }
 
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
@@ -31,7 +32,7 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 	return nil
 }
 
-func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models.Customer, error) {
+func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.CustomerList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -137,10 +138,27 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*[]models
 		decryptedCustomers = append(decryptedCustomers, customer)
 	}
 
-	return &decryptedCustomers, nil
+	count, err := conn.CustomerCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	c.customerList.NumberOfCustomers = count
+
+	if c.customerList.NumberOfCustomers < 10 {
+		c.customerList.NumberOfPages = 1
+	} else {
+		c.customerList.NumberOfPages = int(count/10) + 1
+	}
+
+	c.customerList.Customers = &decryptedCustomers
+	c.customerList.CurrentPage = pageNumber
+
+	return &c.customerList, nil
 }
 
-func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*[]models.Customer, error) {
+func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*models.CustomerList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -247,7 +265,24 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		decryptedCustomers = append(decryptedCustomers, customer)
 	}
 
-	return &decryptedCustomers, nil
+	count, err := conn.CustomerCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	c.customerList.NumberOfCustomers = count
+
+	if c.customerList.NumberOfCustomers < 10 {
+		c.customerList.NumberOfPages = 1
+	} else {
+		c.customerList.NumberOfPages = int(count/10) + 1
+	}
+
+	c.customerList.Customers = &decryptedCustomers
+	c.customerList.CurrentPage = pageNumber
+
+	return &c.customerList, nil
 }
 
 func NewCustomerRepoImpl() CustomerRepoImpl {

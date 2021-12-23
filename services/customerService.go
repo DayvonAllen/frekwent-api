@@ -7,8 +7,8 @@ import (
 
 type CustomerService interface {
 	Create(customer *models.Customer) error
-	FindAll(string, bool) (*[]models.Customer, error)
-	FindAllByFullName(string, string, string, bool) (*[]models.Customer, error)
+	FindAll(string, bool) (*models.CustomerList, error)
+	FindAllByFullName(string, string, string, bool) (*models.CustomerList, error)
 }
 
 type DefaultCustomerService struct {
@@ -25,25 +25,25 @@ func (c DefaultCustomerService) Create(customer *models.Customer) error {
 	return nil
 }
 
-func (c DefaultCustomerService) FindAll(page string, newQuery bool) (*[]models.Customer, error) {
-	ips, err := c.repo.FindAll(page, newQuery)
+func (c DefaultCustomerService) FindAll(page string, newQuery bool) (*models.CustomerList, error) {
+	customers, err := c.repo.FindAll(page, newQuery)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return ips, nil
+	return customers, nil
 }
 
 func (c DefaultCustomerService) FindAllByFullName(firstName string, lastName string,
-	page string, newQuery bool) (*[]models.Customer, error) {
-	ips, err := c.repo.FindAllByFullName(firstName, lastName, page, newQuery)
+	page string, newQuery bool) (*models.CustomerList, error) {
+	customers, err := c.repo.FindAllByFullName(firstName, lastName, page, newQuery)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return ips, nil
+	return customers, nil
 }
 
 func NewCustomerService(repository repository.CustomerRepo) DefaultCustomerService {
