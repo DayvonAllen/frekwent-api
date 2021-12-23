@@ -144,9 +144,7 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 	if err = cur.All(context.TODO(), &e.emails); err != nil {
 		panic(err)
 	}
-
-	fmt.Println(e.emails)
-
+	
 	if e.emails == nil {
 		return nil, errors.New(fmt.Sprintf("No emails found for the email address: %s", email))
 	}

@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 	"strconv"
 	"sync"
 	"time"
@@ -64,7 +65,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		err := EmailRepoImpl{}.Create(email)
 
 		if err != nil {
-			panic(errors.New(fmt.Sprintf("error sending an email to %s", email.CustomerEmail)))
+			log.Println(errors.New(fmt.Sprintf("error sending an email to %s", email.CustomerEmail)))
 		}
 	}(conn)
 
@@ -96,7 +97,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 	}
 
 	if err = cur.All(context.TODO(), &p.purchases); err != nil {
-		panic(errors.New("error finding purchases"))
+		log.Println(errors.New("error finding purchases"))
 	}
 
 	if p.purchases == nil {
@@ -114,7 +115,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), bson.M{})
 
 	if err != nil {
-		panic(errors.New("error finding purchases"))
+		return nil, errors.New("error finding purchases")
 	}
 
 	p.purchaseList.NumberOfPurchases = count
@@ -217,7 +218,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		pi, err := encrypt.Encrypt(dto.StreetAddress)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
 		dto.StreetAddress = pi
@@ -230,7 +231,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 			pi, err := encrypt.Encrypt(dto.OptionalAddress)
 
 			if err != nil {
-				panic(err)
+				log.Println(err)
 			}
 
 			dto.OptionalAddress = pi
@@ -242,7 +243,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		pi, err := encrypt.Encrypt(dto.City)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
 		dto.City = pi
@@ -253,7 +254,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		pi, err := encrypt.Encrypt(dto.State)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
 		dto.State = pi
@@ -264,7 +265,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		pi, err := encrypt.Encrypt(dto.ZipCode)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
 		dto.ZipCode = pi
