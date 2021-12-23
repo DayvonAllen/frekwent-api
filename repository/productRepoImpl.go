@@ -121,7 +121,7 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$set", bson.D{{"name", name},
 		{"updatedAt", time.Now()}}}}
@@ -141,7 +141,7 @@ func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models
 func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$set", bson.D{{"quantity", quantity},
 		{"updatedAt", time.Now()}}}}
@@ -161,7 +161,7 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) 
 func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$set", bson.D{{"price", price},
 		{"updatedAt", time.Now()}}}}
@@ -181,7 +181,7 @@ func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*mode
 func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$set", bson.D{{"description", desc},
 		{"updatedAt", time.Now()}}}}
@@ -201,7 +201,7 @@ func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (
 func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$set", bson.D{{"ingredients", ingredients},
 		{"updatedAt", time.Now()}}}}
