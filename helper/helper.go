@@ -19,6 +19,7 @@ import (
 )
 
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+var priceRegex = regexp.MustCompile("(\\d+\\.\\d{1,2})")
 
 var src = mRand.NewSource(time.Now().UnixNano())
 
@@ -98,6 +99,13 @@ func IsEmail(e string) bool {
 		return false
 	}
 	return emailRegex.MatchString(e)
+}
+
+func IsValidPrice(e string) bool {
+	if len(e) < 1 {
+		return false
+	}
+	return priceRegex.MatchString(e)
 }
 
 func ExtractData(token string) ([]string, error) {

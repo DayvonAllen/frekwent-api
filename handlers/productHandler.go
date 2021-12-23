@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"freq/helper"
 	"freq/models"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +22,10 @@ func (ph *ProductHandler) Create(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	if !helper.IsValidPrice(product.Price) {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", errors.New("invalid price"))})
 	}
 
 	err = ph.ProductService.Create(product)
@@ -109,6 +115,10 @@ func (ph *ProductHandler) UpdatePrice(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	if !helper.IsValidPrice(product.Price) {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", errors.New("invalid price"))})
 	}
 
 	updatedProduct, err := ph.ProductService.UpdatePrice(product.Price, monId)
