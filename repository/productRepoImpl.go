@@ -121,21 +121,33 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"_id", id}}
-	update := bson.D{{"$set", bson.D{{"name", name},
-		{"updatedAt", time.Now()}}}}
+	prod := new(models.Product)
 
-	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&p.product)
+	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"name", name}}).Decode(prod)
 
 	if err != nil {
-		return nil, err
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			opts := options.FindOneAndUpdate()
+			filter := bson.D{{"_id", id}}
+			update := bson.D{{"$set", bson.D{{"name", name},
+				{"updatedAt", time.Now()}}}}
+
+			err = conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+				filter, update, opts).Decode(&p.product)
+
+			if err != nil {
+				return nil, err
+			}
+
+			p.product.Name = name
+
+			return &p.product, nil
+		}
+		return nil, fmt.Errorf("error processing data")
 	}
 
-	p.product.Name = name
-
-	return &p.product, nil
+	return nil, errors.New("product with that name already exists")
 }
 
 func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) (*models.Product, error) {
