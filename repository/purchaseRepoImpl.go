@@ -46,10 +46,6 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 
 	err := CustomerRepoImpl{}.Create(customer)
 
-	if err != nil {
-		return err
-	}
-
 	_, err = conn.PurchaseCollection.InsertOne(context.TODO(), purchase)
 
 	if err != nil {
@@ -58,7 +54,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 
 	go func(connection *database.Connection) {
 		email := new(models.Email)
-		email.To = customer.Email
+		email.CustomerEmail = customer.Email
 		email.From = "frekwent@frekwent.com"
 		email.Subject = "test subject"
 		email.Content = "test content"
@@ -68,7 +64,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		err := EmailRepoImpl{}.Create(email)
 
 		if err != nil {
-			panic(err)
+			panic(errors.New(fmt.Sprintf("error sending an email to %s", email.CustomerEmail)))
 		}
 	}(conn)
 
@@ -96,11 +92,11 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 	cur, err := conn.PurchaseCollection.Find(context.TODO(), bson.M{}, &findOptions)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error finding purchases")
 	}
 
 	if err = cur.All(context.TODO(), &p.purchases); err != nil {
-		panic(err)
+		panic(errors.New("error finding purchases"))
 	}
 
 	if p.purchases == nil {
@@ -118,7 +114,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), bson.M{})
 
 	if err != nil {
-		panic(err)
+		panic(errors.New("error finding purchases"))
 	}
 
 	p.purchaseList.NumberOfPurchases = count
@@ -143,7 +139,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err == mongo.ErrNoDocuments {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("no purchase with the ID %v", id))
 		}
 		return nil, fmt.Errorf("error processing data")
 	}
@@ -161,7 +157,7 @@ func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purch
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err == mongo.ErrNoDocuments {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("error finding purchases with purchase confirmation ID %v", id))
 		}
 		return nil, fmt.Errorf("error processing data")
 	}
@@ -174,13 +170,17 @@ func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purch
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"shipped", dto.Shipped},
 		{"trackingId", dto.TrackingId}}}}
 
-	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts)
+	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.purchase)
+
+	if err != nil {
+		return errors.New("error updating purchase's shipping status")
+	}
 
 	return nil
 }
@@ -188,12 +188,16 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"delivered", dto.Delivered}}}}
 
-	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts)
+	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.purchase)
+
+	if err != nil {
+		return errors.New("error updating purchase's delivered status")
+	}
 
 	return nil
 }
@@ -268,7 +272,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 
 	wg.Wait()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"streetAddress", dto.StreetAddress},
 		{"optionalAddress", dto.OptionalAddress},
@@ -276,8 +280,12 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 		{"state", dto.State},
 		{"zipCode", dto.ZipCode}}}}
 
-	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts)
+	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.purchase)
+
+	if err != nil {
+		return errors.New("error updating purchase's address")
+	}
 
 	return nil
 }
@@ -285,12 +293,16 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) error {
 	conn := database.ConnectToDB()
 
-	opts := options.FindOneAndUpdate().SetUpsert(true)
+	opts := options.FindOneAndUpdate()
 	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"trackingId", dto.TrackingId}}}}
 
-	conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts)
+	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.purchase)
+
+	if err != nil {
+		return errors.New("error updating purchase's tracking ID")
+	}
 
 	return nil
 }

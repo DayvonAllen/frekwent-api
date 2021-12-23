@@ -85,13 +85,13 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 	decryptedEmail := make([]models.Email, 0, len(e.emails))
 
 	for _, email := range e.emails {
-		pi, err := encrypt.Decrypt(email.To)
+		pi, err := encrypt.Decrypt(email.CustomerEmail)
 
 		if err != nil {
 			panic(err)
 		}
 
-		email.To = pi
+		email.CustomerEmail = pi
 
 		decryptedEmail = append(decryptedEmail, email)
 	}
@@ -116,7 +116,7 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 	return &e.emailList, nil
 }
 
-func (e EmailRepoImpl) FindAllByEmail(page string, newLoginQuery bool, email string) (*models.EmailList, error) {
+func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email string) (*models.EmailList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -130,11 +130,11 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newLoginQuery bool, email str
 	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
 	findOptions.SetLimit(int64(perPage))
 
-	if newLoginQuery {
+	if newEmailQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.EmailCollection.Find(context.TODO(), bson.D{{"email", email}}, &findOptions)
+	cur, err := conn.EmailCollection.Find(context.TODO(), bson.D{{"customerEmail", email}}, &findOptions)
 
 	if err != nil {
 		return nil, err
@@ -143,6 +143,8 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newLoginQuery bool, email str
 	if err = cur.All(context.TODO(), &e.emails); err != nil {
 		panic(err)
 	}
+
+	fmt.Println(e.emails)
 
 	if e.emails == nil {
 		return nil, errors.New(fmt.Sprintf("No emails found for the email address: %s", email))
