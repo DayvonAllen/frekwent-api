@@ -8,7 +8,7 @@ import (
 
 type PurchaseService interface {
 	Purchase(purchase *models.Purchase) error
-	FindAll(string, bool) (*[]models.Purchase, error)
+	FindAll(string, bool) (*models.PurchaseList, error)
 	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
 	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
 }
@@ -27,7 +27,7 @@ func (p DefaultPurchaseService) Purchase(purchase *models.Purchase) error {
 	return nil
 }
 
-func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*[]models.Purchase, error) {
+func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*models.PurchaseList, error) {
 	purchases, err := p.repo.FindAll(page, newQuery)
 
 	if err != nil {

@@ -55,3 +55,10 @@ type PurchaseTrackingDTO struct {
 	Id         primitive.ObjectID `json:"id"`
 	TrackingId string             `json:"trackingId" validate:"max=150,min=1"`
 }
+
+type PurchaseList struct {
+	Purchases         *[]Purchase `json:"purchases"`
+	NumberOfPurchases int64       `json:"numberOfPurchases"`
+	CurrentPage       int         `json:"currentPage"`
+	NumberOfPages     int         `json:"numberOfPages"`
+}

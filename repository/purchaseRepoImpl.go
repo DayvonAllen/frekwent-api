@@ -17,8 +17,9 @@ import (
 )
 
 type PurchaseRepoImpl struct {
-	purchase  models.Purchase
-	purchases []models.Purchase
+	purchase     models.Purchase
+	purchases    []models.Purchase
+	purchaseList models.PurchaseList
 }
 
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
@@ -57,7 +58,7 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	return nil
 }
 
-func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models.Purchase, error) {
+func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.PurchaseList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -93,7 +94,24 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*[]models
 		}
 	}(cur, context.TODO())
 
-	return &p.purchases, nil
+	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), bson.M{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	p.purchaseList.NumberOfPurchases = count
+
+	if p.purchaseList.NumberOfPurchases < 10 {
+		p.purchaseList.NumberOfPages = 1
+	} else {
+		p.purchaseList.NumberOfPages = int(count/10) + 1
+	}
+
+	p.purchaseList.Purchases = &p.purchases
+	p.purchaseList.CurrentPage = pageNumber
+
+	return &p.purchaseList, nil
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
