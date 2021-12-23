@@ -56,6 +56,22 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		return fmt.Errorf("error processing data")
 	}
 
+	go func(connection *database.Connection) {
+		email := new(models.Email)
+		email.To = customer.Email
+		email.From = "frekwent@frekwent.com"
+		email.Subject = "test subject"
+		email.Content = "test content"
+		email.Type = "purchase"
+		email.Status = "pending"
+
+		err := EmailRepoImpl{}.Create(email)
+
+		if err != nil {
+			panic(err)
+		}
+	}(conn)
+
 	return nil
 }
 

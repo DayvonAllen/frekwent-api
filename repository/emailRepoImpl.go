@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"freq/config"
 	"freq/database"
+	"freq/helper"
 	"freq/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -36,7 +38,7 @@ func (e EmailRepoImpl) Create(email *models.Email) error {
 	return nil
 }
 
-func (e EmailRepoImpl) FindAll(page string, newLoginQuery bool) (*models.EmailList, error) {
+func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -50,7 +52,7 @@ func (e EmailRepoImpl) FindAll(page string, newLoginQuery bool) (*models.EmailLi
 	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
 	findOptions.SetLimit(int64(perPage))
 
-	if newLoginQuery {
+	if newEmailQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
@@ -76,6 +78,24 @@ func (e EmailRepoImpl) FindAll(page string, newLoginQuery bool) (*models.EmailLi
 		}
 	}(cur, context.TODO())
 
+	key := config.Config("KEY")
+
+	encrypt := helper.Encryption{Key: []byte(key)}
+
+	decryptedEmail := make([]models.Email, 0, len(e.emails))
+
+	for _, email := range e.emails {
+		pi, err := encrypt.Decrypt(email.To)
+
+		if err != nil {
+			panic(err)
+		}
+
+		email.To = pi
+
+		decryptedEmail = append(decryptedEmail, email)
+	}
+
 	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.M{})
 
 	if err != nil {
@@ -90,7 +110,7 @@ func (e EmailRepoImpl) FindAll(page string, newLoginQuery bool) (*models.EmailLi
 		e.emailList.NumberOfPages = int(count/10) + 1
 	}
 
-	e.emailList.Emails = &e.emails
+	e.emailList.Emails = &decryptedEmail
 	e.emailList.CurrentPage = pageNumber
 
 	return &e.emailList, nil
