@@ -116,6 +116,7 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 	return &e.emailList, nil
 }
 
+// FindAllByEmail TODO fix functionality for find By Email
 func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email string) (*models.EmailList, error) {
 	conn := database.ConnectToDB()
 
