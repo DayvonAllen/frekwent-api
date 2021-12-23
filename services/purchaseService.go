@@ -11,6 +11,10 @@ type PurchaseService interface {
 	FindAll(string, bool) (*models.PurchaseList, error)
 	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
 	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
+	UpdateShippedStatus(*models.PurchaseShippedDTO) error
+	UpdateDeliveredStatus(*models.PurchaseDeliveredDTO) error
+	UpdatePurchaseAddress(*models.PurchaseAddressDTO) error
+	UpdateTrackingNumber(*models.PurchaseTrackingDTO) error
 }
 
 type DefaultPurchaseService struct {
@@ -55,6 +59,46 @@ func (p DefaultPurchaseService) FindByPurchaseConfirmationId(id string) (*models
 	}
 
 	return purchase, nil
+}
+
+func (p DefaultPurchaseService) UpdateShippedStatus(shipped *models.PurchaseShippedDTO) error {
+	err := p.repo.UpdateShippedStatus(shipped)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p DefaultPurchaseService) UpdateDeliveredStatus(del *models.PurchaseDeliveredDTO) error {
+	err := p.repo.UpdateDeliveredStatus(del)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p DefaultPurchaseService) UpdatePurchaseAddress(add *models.PurchaseAddressDTO) error {
+	err := p.repo.UpdatePurchaseAddress(add)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p DefaultPurchaseService) UpdateTrackingNumber(trac *models.PurchaseTrackingDTO) error {
+	err := p.repo.UpdateTrackingNumber(trac)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewPurchaseService(repository repository.PurchaseRepo) DefaultPurchaseService {

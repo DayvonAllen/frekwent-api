@@ -100,3 +100,115 @@ func (ph *PurchaseHandler) FindByPurchaseConfirmationId(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
 }
+
+func (ph *PurchaseHandler) UpdateShippedStatus(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	purchase := new(models.PurchaseShippedDTO)
+	err := c.BodyParser(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	id := c.Params("id")
+
+	monId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	purchase.Id = monId
+
+	err = ph.PurchaseService.UpdateShippedStatus(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+}
+
+func (ph *PurchaseHandler) UpdateDeliveredStatus(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	purchase := new(models.PurchaseDeliveredDTO)
+	err := c.BodyParser(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	id := c.Params("id")
+
+	monId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	purchase.Id = monId
+
+	err = ph.PurchaseService.UpdateDeliveredStatus(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+}
+
+func (ph *PurchaseHandler) UpdatePurchaseAddress(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	purchase := new(models.PurchaseAddressDTO)
+	err := c.BodyParser(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	id := c.Params("id")
+
+	monId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	purchase.Id = monId
+
+	err = ph.PurchaseService.UpdatePurchaseAddress(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+}
+
+func (ph *PurchaseHandler) UpdateTrackingNumber(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	purchase := new(models.PurchaseTrackingDTO)
+	err := c.BodyParser(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	id := c.Params("id")
+
+	monId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	purchase.Id = monId
+
+	err = ph.PurchaseService.UpdateTrackingNumber(purchase)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": "success"})
+}
