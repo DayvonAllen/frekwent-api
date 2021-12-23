@@ -114,13 +114,13 @@ func ExtractData(token string) ([]string, error) {
 	return tokenValue, nil
 }
 
-func EncryptPurchase(purchase *models.Purchase) *models.Purchase {
+func EncryptPI(purchase *models.Purchase) *models.Purchase {
 	key := config.Config("KEY")
 
 	encrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(9)
+	wg.Add(6)
 
 	go func() {
 		defer wg.Done()
@@ -131,39 +131,6 @@ func EncryptPurchase(purchase *models.Purchase) *models.Purchase {
 		purchase.TrackingId = ""
 		purchase.CreatedAt = time.Now()
 		purchase.UpdatedAt = time.Now()
-	}()
-
-	go func() {
-		defer wg.Done()
-		cc, err := encrypt.Encrypt(purchase.CreditCardNumber)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardNumber = cc
-	}()
-
-	go func() {
-		defer wg.Done()
-		cc, err := encrypt.Encrypt(purchase.CreditCardSecurityCode)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardSecurityCode = cc
-	}()
-
-	go func() {
-		defer wg.Done()
-		cc, err := encrypt.Encrypt(purchase.CreditCardExpirationDate)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardExpirationDate = cc
 	}()
 
 	go func() {
@@ -229,46 +196,13 @@ func EncryptPurchase(purchase *models.Purchase) *models.Purchase {
 	return purchase
 }
 
-func DecryptPurchase(purchase *models.Purchase) *models.Purchase {
+func DecryptPI(purchase *models.Purchase) *models.Purchase {
 	key := config.Config("KEY")
 
 	decrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(8)
-
-	go func() {
-		defer wg.Done()
-		cc, err := decrypt.Decrypt(purchase.CreditCardNumber)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardNumber = cc
-	}()
-
-	go func() {
-		defer wg.Done()
-		cc, err := decrypt.Decrypt(purchase.CreditCardSecurityCode)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardSecurityCode = cc
-	}()
-
-	go func() {
-		defer wg.Done()
-		cc, err := decrypt.Decrypt(purchase.CreditCardExpirationDate)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.CreditCardExpirationDate = cc
-	}()
+	wg.Add(5)
 
 	go func() {
 		defer wg.Done()

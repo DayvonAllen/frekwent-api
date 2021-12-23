@@ -24,7 +24,7 @@ type PurchaseRepoImpl struct {
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	conn := database.ConnectToDB()
 
-	purchase = helper.EncryptPurchase(purchase)
+	purchase = helper.EncryptPI(purchase)
 
 	customer := new(models.Customer)
 
@@ -109,7 +109,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 		return nil, fmt.Errorf("error processing data")
 	}
 
-	p.purchase = *helper.DecryptPurchase(&p.purchase)
+	p.purchase = *helper.DecryptPI(&p.purchase)
 
 	return &p.purchase, nil
 }
@@ -127,7 +127,7 @@ func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purch
 		return nil, fmt.Errorf("error processing data")
 	}
 
-	p.purchase = *helper.DecryptPurchase(&p.purchase)
+	p.purchase = *helper.DecryptPI(&p.purchase)
 
 	return &p.purchase, nil
 }
