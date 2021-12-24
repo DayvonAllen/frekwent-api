@@ -58,13 +58,17 @@ func (eh *EmailHandler) FindAllByEmail(c *fiber.Ctx) error {
 }
 
 func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
-	emailType := c.Params("emailType")
+	emailType := strings.ToLower(c.Params("emailType"))
 	c.Accepts("application/json")
 	email := new(models.EmailDto)
 	err := c.BodyParser(email)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	if emailType != "customerInteraction" && emailType != "couponPromotion" {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid email type"})
 	}
 
 	createdEmail := helper.CreateEmail(new(models.Email), email, emailType)
