@@ -5,7 +5,7 @@
 - No auth routes:
   - `http://localhost:8080/products`- gets all products
   - `http://localhost:8080/products/<id>` - get product by ID
-  - `http://localhost:8080/list/optout/jdoe@gmail.com` - opt out of emails
+  - `http://localhost:8080/list/optout/<email>` - opt out of emails
 - Auth routes:
   - `http://localhost:8080/iriguchi/coupon` - get coupons
   - `http://localhost:8080/iriguchi/coupon/code/<coupon code>` - get coupons by code
