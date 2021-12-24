@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type CustomerRepoImpl struct {
@@ -323,6 +324,55 @@ func (c CustomerRepoImpl) FindByEmail(email string) (*models.Customer, error) {
 
 	return &c.customer, nil
 }
+
+func (c CustomerRepoImpl) FindAllByOptInStatus(optIn bool) (*[]models.Customer, error) {
+	conn := database.ConnectToDB()
+
+	cur, err := conn.CustomerCollection.Find(context.TODO(), bson.D{{"infoEmailOptIn", optIn}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cur.All(context.TODO(), &c.customers); err != nil {
+		panic(err)
+	}
+
+	if c.customers == nil {
+		return nil, errors.New("error finding customers")
+	}
+
+	// Close the cursor once finished
+	defer func(cur *mongo.Cursor, ctx context.Context) {
+		err := cur.Close(ctx)
+		if err != nil {
+			panic(fmt.Errorf("error processing data"))
+		}
+	}(cur, context.TODO())
+
+	return &c.customers, nil
+}
+
+func (c CustomerRepoImpl) UpdateOptInStatus(status bool, email string) (*models.Customer, error) {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate()
+	filter := bson.D{{"email", email}}
+	update := bson.D{{"$set", bson.D{{"infoEmailOptIn", status},
+		{"updatedAt", time.Now()}}}}
+
+	err := conn.CustomerCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&c.customer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c.customer.InfoEmailOptIn = status
+
+	return &c.customer, nil
+}
+
 func NewCustomerRepoImpl() CustomerRepoImpl {
 	var customerRepoImpl CustomerRepoImpl
 
