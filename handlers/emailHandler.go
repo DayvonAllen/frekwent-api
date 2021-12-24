@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"freq/helper"
+	"freq/models"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
@@ -54,4 +55,25 @@ func (eh *EmailHandler) FindAllByEmail(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": emails})
+}
+
+func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
+	emailType := c.Params("emailType")
+	c.Accepts("application/json")
+	email := new(models.EmailDto)
+	err := c.BodyParser(email)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	createdEmail := helper.CreateEmail(new(models.Email), email, emailType)
+
+	err = eh.EmailService.Create(createdEmail)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "created"})
 }

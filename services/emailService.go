@@ -6,8 +6,19 @@ import (
 )
 
 type EmailService interface {
+	Create(email *models.Email) error
 	FindAll(string, bool) (*models.EmailList, error)
 	FindAllByEmail(string, bool, string) (*models.EmailList, error)
+}
+
+func (e DefaultEmailService) Create(email *models.Email) error {
+	err := e.repo.Create(email)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (e DefaultEmailService) FindAll(page string, newQuery bool) (*models.EmailList, error) {
