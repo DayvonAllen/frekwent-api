@@ -5,6 +5,7 @@
 - No auth routes:
   - `http://localhost:8080/products`- gets all products
   - `http://localhost:8080/products/<id>` - get product by ID
+  - `http://localhost:8080/list/optout/jdoe@gmail.com` - opt out of emails
 - Auth routes:
   - `http://localhost:8080/iriguchi/coupon` - get coupons
   - `http://localhost:8080/iriguchi/coupon/code/<coupon code>` - get coupons by code
@@ -18,6 +19,7 @@
   - `http://localhost:8080/iriguchi/purchases/confirmation/<confirmation ID>` - get purchase by confirmation ID
   - `http://localhost:8080/iriguchi/email` - get all emails
   - `http://localhost:8080/iriguchi/email/get/<email address>` - get emails by email address
+  - `http://localhost:8080/iriguchi/customer/optin` - get all customers that have opted in to receiving emails
 ---
   
 ## POST Routes

@@ -365,7 +365,7 @@ func (c CustomerRepoImpl) UpdateOptInStatus(status bool, email string) (*models.
 		filter, update, opts).Decode(&c.customer)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("cannot update opt in status")
 	}
 
 	c.customer.InfoEmailOptIn = status

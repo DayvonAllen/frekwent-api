@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"freq/helper"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
@@ -51,4 +52,30 @@ func (ch *CustomerHandler) FindAllByFullName(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": customers})
+}
+
+func (ch *CustomerHandler) FindAllByOptInStatus(c *fiber.Ctx) error {
+	customers, err := ch.CustomerService.FindAllByOptInStatus(true)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": customers})
+}
+
+func (ch *CustomerHandler) UpdateOptInStatus(c *fiber.Ctx) error {
+	email := c.Params("email")
+
+	if !helper.IsEmail(email) {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "invalid email"})
+	}
+
+	customer, err := ch.CustomerService.UpdateOptInStatus(false, email)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": customer.Email})
 }
