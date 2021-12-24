@@ -54,9 +54,11 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 	}
 
 	go func(connection *database.Connection) {
+		emailAdd := config.Config("BUSINESS_EMAIL")
+
 		email := new(models.Email)
 		email.CustomerEmail = customer.Email
-		email.From = "frekwent@frekwent.com"
+		email.From = emailAdd
 		email.Subject = "test subject"
 		email.Content = "test content"
 		email.Type = "purchase"

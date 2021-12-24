@@ -136,7 +136,7 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 		}
 	}(cur, context.TODO())
 
-	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.D{{"customerEmail", email}})
 
 	if err != nil {
 		panic(err)

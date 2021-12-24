@@ -273,3 +273,19 @@ func DecryptPI(purchase *models.Purchase) *models.Purchase {
 
 	return purchase
 }
+
+func CreateEmail(email *models.Email, emailDto *models.EmailDto, emailType string) *models.Email {
+	emailAdd := config.Config("BUSINESS_EMAIL")
+
+	email.Id = primitive.NewObjectID()
+	email.From = emailAdd
+	email.CustomerEmail = emailDto.Email
+	email.Content = emailDto.Content
+	email.Subject = emailDto.Subject
+	email.Status = "pending"
+	email.Type = emailType
+	email.CreatedAt = time.Now()
+	email.UpdatedAt = time.Now()
+
+	return email
+}
