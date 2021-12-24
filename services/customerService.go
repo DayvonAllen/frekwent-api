@@ -9,6 +9,8 @@ type CustomerService interface {
 	Create(customer *models.Customer) error
 	FindAll(string, bool) (*models.CustomerList, error)
 	FindAllByFullName(string, string, string, bool) (*models.CustomerList, error)
+	FindAllByOptInStatus(bool) (*[]models.Customer, error)
+	UpdateOptInStatus(bool, string) (*models.Customer, error)
 }
 
 type DefaultCustomerService struct {
@@ -38,6 +40,26 @@ func (c DefaultCustomerService) FindAll(page string, newQuery bool) (*models.Cus
 func (c DefaultCustomerService) FindAllByFullName(firstName string, lastName string,
 	page string, newQuery bool) (*models.CustomerList, error) {
 	customers, err := c.repo.FindAllByFullName(firstName, lastName, page, newQuery)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return customers, nil
+}
+
+func (c DefaultCustomerService) FindAllByOptInStatus(status bool) (*[]models.Customer, error) {
+	customers, err := c.repo.FindAllByOptInStatus(status)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return customers, nil
+}
+
+func (c DefaultCustomerService) UpdateOptInStatus(status bool, email string) (*models.Customer, error) {
+	customers, err := c.repo.UpdateOptInStatus(status, email)
 
 	if err != nil {
 		return nil, err
