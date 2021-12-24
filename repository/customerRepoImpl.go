@@ -95,18 +95,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
-		wg.Add(6)
-		go func() {
-			defer wg.Done()
-			pi, err := encrypt.Decrypt(customer.Email)
-
-			if err != nil {
-				panic(err)
-			}
-
-			customer.Email = pi
-		}()
-
+		wg.Add(5)
 		go func() {
 			defer wg.Done()
 			pi, err := encrypt.Decrypt(customer.StreetAddress)
@@ -237,18 +226,7 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 	decryptedCustomers := make([]models.Customer, 0, len(c.customers))
 
 	for _, customer := range c.customers {
-		wg.Add(6)
-		go func() {
-			defer wg.Done()
-			pi, err := encrypt.Decrypt(customer.Email)
-
-			if err != nil {
-				panic(err)
-			}
-
-			customer.Email = pi
-		}()
-
+		wg.Add(5)
 		go func() {
 			defer wg.Done()
 			pi, err := encrypt.Decrypt(customer.StreetAddress)
