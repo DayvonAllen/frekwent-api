@@ -96,7 +96,6 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 	return &e.emailList, nil
 }
 
-// FindAllByEmail TODO fix functionality for find By Email
 func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email string) (*models.EmailList, error) {
 	conn := database.ConnectToDB()
 
@@ -155,6 +154,23 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 	e.emailList.CurrentPage = pageNumber
 
 	return &e.emailList, nil
+}
+
+func (e EmailRepoImpl) UpdateEmailStatus(id primitive.ObjectID, status string) error {
+	conn := database.ConnectToDB()
+
+	_, err := conn.EmailCollection.UpdateByID(context.TODO(), id, bson.D{{"updatedAt", time.Now()},
+		{"status", status}})
+
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return err
+		}
+		return fmt.Errorf("error processing data")
+	}
+
+	return nil
 }
 
 func NewEmailRepoImpl() EmailRepoImpl {

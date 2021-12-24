@@ -20,6 +20,7 @@ type Email struct {
 type EmailDto struct {
 	Email   string `json:"email"`
 	Content string `json:"content"`
+	Subject string `json:"subject"`
 }
 
 type EmailList struct {
