@@ -308,6 +308,21 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 	return &c.customerList, nil
 }
 
+func (c CustomerRepoImpl) FindByEmail(email string) (*models.Customer, error) {
+	conn := database.ConnectToDB()
+
+	err := conn.CustomerCollection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&c.customer)
+
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return nil, err
+		}
+		return nil, fmt.Errorf("error processing data")
+	}
+
+	return &c.customer, nil
+}
 func NewCustomerRepoImpl() CustomerRepoImpl {
 	var customerRepoImpl CustomerRepoImpl
 

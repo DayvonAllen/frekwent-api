@@ -18,9 +18,10 @@ type Email struct {
 }
 
 type EmailDto struct {
-	Email   string `json:"email"`
-	Content string `json:"content"`
-	Subject string `json:"subject"`
+	Email      string `json:"email"`
+	Content    string `json:"content"`
+	Subject    string `json:"subject"`
+	CouponCode string `json:"couponCode"`
 }
 
 type EmailList struct {

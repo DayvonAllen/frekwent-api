@@ -78,6 +78,23 @@
     "infoEmailOptIn": true
 }
 ```
+- `http://localhost:8080/iriguchi/coupon/send/couponPromotion`
+``` 
+{
+    "email": "jdoe@gmail.com",
+    "subject": "test coupon",
+    "content": "test coupon",
+    "couponCode": "testcode"
+}
+```
+- `http://localhost:8080/iriguchi/coupon/send/customerInteraction`
+``` 
+{
+    "email": "jdoe@gmail.com",
+    "subject": "test customer interaction",
+    "content": "test customer interaction"
+}
+```
 ---
 
 ## PUT Routes(All Routes Are Authenticated)

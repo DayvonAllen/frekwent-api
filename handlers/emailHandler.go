@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"freq/helper"
 	"freq/models"
+	"freq/repository"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
 	"strconv"
@@ -67,7 +68,25 @@ func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	if emailType != "customerInteraction" && emailType != "couponPromotion" {
+	if emailType == "customerinteraction" {
+		_, err = repository.CustomerRepoImpl{}.FindByEmail(strings.ToLower(email.Email))
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Customer email does not exist"})
+		}
+	} else if emailType == "couponpromotion" {
+		if len(email.CouponCode) == 0 {
+			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
+		}
+		_, err = repository.CustomerRepoImpl{}.FindByEmail(strings.ToLower(email.Email))
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Customer email does not exist"})
+		}
+
+		_, err = repository.CouponRepoImpl{}.FindByCode(strings.ToLower(email.CouponCode))
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
+		}
+	} else {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid email type"})
 	}
 
