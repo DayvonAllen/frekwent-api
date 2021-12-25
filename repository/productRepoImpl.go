@@ -106,6 +106,66 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.Pro
 	return &p.productList, nil
 }
 
+func (p ProductRepoImpl) FindAllByCategory(category string, page string, newProductQuery bool) (*models.ProductList, error) {
+	conn := database.ConnectToDB()
+
+	findOptions := options.FindOptions{}
+	perPage := 10
+	pageNumber, err := strconv.Atoi(page)
+
+	if err != nil {
+		return nil, fmt.Errorf("page must be a number")
+	}
+
+	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
+	findOptions.SetLimit(int64(perPage))
+
+	if newProductQuery {
+		findOptions.SetSort(bson.D{{"createdAt", -1}})
+	}
+
+	cur, err := conn.ProductCollection.Find(context.TODO(), bson.D{{"category", category}}, &findOptions)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cur.All(context.TODO(), &p.products); err != nil {
+		panic(err)
+	}
+
+	if p.products == nil {
+		return nil, errors.New("no products in the database")
+	}
+
+	// Close the cursor once finished
+	defer func(cur *mongo.Cursor, ctx context.Context) {
+		err := cur.Close(ctx)
+		if err != nil {
+			panic(fmt.Errorf("error processing data"))
+		}
+	}(cur, context.TODO())
+
+	count, err := conn.ProductCollection.CountDocuments(context.TODO(), bson.D{{"category", category}})
+
+	if err != nil {
+		panic(err)
+	}
+
+	p.productList.NumberOfProducts = count
+
+	if p.productList.NumberOfProducts < 10 {
+		p.productList.NumberOfPages = 1
+	} else {
+		p.productList.NumberOfPages = int(count/10) + 1
+	}
+
+	p.productList.Products = &p.products
+	p.productList.CurrentPage = pageNumber
+
+	return &p.productList, nil
+}
+
 func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
@@ -230,6 +290,26 @@ func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.O
 	}
 
 	p.product.Ingredients = *ingredients
+
+	return &p.product, nil
+}
+
+func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate()
+	filter := bson.D{{"_id", id}}
+	update := bson.D{{"$set", bson.D{{"category", category},
+		{"updatedAt", time.Now()}}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.product)
+
+	if err != nil {
+		return nil, err
+	}
+
+	p.product.Category = category
 
 	return &p.product, nil
 }

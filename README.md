@@ -6,6 +6,7 @@
   - `http://localhost:8080/products`- gets all products
   - `http://localhost:8080/products/<id>` - get product by ID
   - `http://localhost:8080/list/optout/<email>` - opt out of emails
+  - `http://localhost:8080/products/category/<category>` - get all products by category
 - Auth routes:
   - `http://localhost:8080/iriguchi/coupon` - get coupons
   - `http://localhost:8080/iriguchi/coupon/code/<coupon code>` - get coupons by code
@@ -35,13 +36,14 @@
 - `http://localhost:8080/iriguchi/items` - create product
 ``` 
 {
-    "name": "test product",
+    "name": "test product5",
     "images": [],
     "price": "10.01",
     "quantity": 20,
     "description": "desc...",
-    "ingredients": []
-} 
+    "ingredients": [],
+    "category": "faceWash"
+}
 ```
 - `http://localhost:8080/iriguchi/coupon` - create coupon
 ``` 
@@ -80,7 +82,7 @@
     "infoEmailOptIn": true
 }
 ```
-- `http://localhost:8080/iriguchi/coupon/send/couponPromotion`
+- `http://localhost:8080/iriguchi/coupon/send/couponPromotion` - email a coupon to a customer
 ``` 
 {
     "email": "jdoe@gmail.com",
@@ -89,7 +91,7 @@
     "couponCode": "testcode"
 }
 ```
-- `http://localhost:8080/iriguchi/coupon/send/customerInteraction`
+- `http://localhost:8080/iriguchi/coupon/send/customerInteraction` - email a customer
 ``` 
 {
     "email": "jdoe@gmail.com",
@@ -158,6 +160,12 @@
     "state": "CA",
     "zipCode": "90044"
 }
+```
+- `http://localhost:8080/iriguchi/items/category/61c67e137cbc1496a04564de` - update category
+``` 
+{
+    "category": "faceWash"
+} 
 ```
 ---
 

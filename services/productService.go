@@ -9,12 +9,14 @@ import (
 type ProductService interface {
 	Create(product *models.Product) error
 	FindAll(string, bool) (*models.ProductList, error)
+	FindAllByCategory(string, string, bool) (*models.ProductList, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
 	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)
 	UpdateDescription(string, primitive.ObjectID) (*models.Product, error)
 	UpdateIngredients(*[]string, primitive.ObjectID) (*models.Product, error)
+	UpdateCategory(string, primitive.ObjectID) (*models.Product, error)
 	DeleteById(primitive.ObjectID) error
 }
 
@@ -34,6 +36,16 @@ func (p DefaultProductService) Create(product *models.Product) error {
 
 func (p DefaultProductService) FindAll(page string, newQuery bool) (*models.ProductList, error) {
 	products, err := p.repo.FindAll(page, newQuery)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (p DefaultProductService) FindAllByCategory(category string, page string, newQuery bool) (*models.ProductList, error) {
+	products, err := p.repo.FindAllByCategory(category, page, newQuery)
 
 	if err != nil {
 		return nil, err
@@ -94,6 +106,15 @@ func (p DefaultProductService) UpdateDescription(desc string, id primitive.Objec
 
 func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
 	product, err := p.repo.UpdateIngredients(ingredients, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+func (p DefaultProductService) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
+	product, err := p.repo.UpdateCategory(category, id)
 
 	if err != nil {
 		return nil, err

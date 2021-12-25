@@ -31,6 +31,7 @@ func SetupRoutes(app *fiber.App) {
 	product := api.Group("/products")
 	product.Post("/buy", ph.Purchase)
 	product.Get("/:id", prh.FindByProductId)
+	product.Get("/category/:category", prh.FindAllByCategory)
 	product.Get("", prh.FindAll)
 
 	optOut := api.Group("/list/optout")
@@ -51,6 +52,7 @@ func SetupRoutes(app *fiber.App) {
 	items.Put("/quantity/:id", middleware.IsLoggedIn, prh.UpdateQuantity)
 	items.Put("/ingredients/:id", middleware.IsLoggedIn, prh.UpdateIngredients)
 	items.Put("/price/:id", middleware.IsLoggedIn, prh.UpdatePrice)
+	items.Put("/category/:id", middleware.IsLoggedIn, prh.UpdateCategory)
 	items.Delete("/delete/:id", middleware.IsLoggedIn, prh.DeleteById)
 	items.Post("", middleware.IsLoggedIn, prh.Create)
 

@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
+	"strings"
 )
 
 type ProductHandler struct {
@@ -27,6 +28,8 @@ func (ph *ProductHandler) Create(c *fiber.Ctx) error {
 	if !helper.IsValidPrice(product.Price) {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", errors.New("invalid price"))})
 	}
+
+	product.Category = strings.ToLower(product.Category)
 
 	err = ph.ProductService.Create(product)
 
@@ -48,6 +51,26 @@ func (ph *ProductHandler) FindAll(c *fiber.Ctx) error {
 	}
 
 	products, err := ph.ProductService.FindAll(page, isNew)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": products})
+}
+
+func (ph *ProductHandler) FindAllByCategory(c *fiber.Ctx) error {
+	page := c.Query("page", "1")
+	newProductQuery := c.Query("new", "false")
+	category := c.Params("category")
+
+	isNew, err := strconv.ParseBool(newProductQuery)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid value")})
+	}
+
+	products, err := ph.ProductService.FindAllByCategory(strings.ToLower(category), page, isNew)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
@@ -200,6 +223,32 @@ func (ph *ProductHandler) UpdateIngredients(c *fiber.Ctx) error {
 	}
 
 	updatedProduct, err := ph.ProductService.UpdateIngredients(product.Ingredients, monId)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": updatedProduct})
+}
+
+func (ph *ProductHandler) UpdateCategory(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	product := new(models.ProductCategoryDto)
+	err := c.BodyParser(product)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	id := c.Params("id")
+
+	monId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	updatedProduct, err := ph.ProductService.UpdateCategory(strings.ToLower(product.Category), monId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
