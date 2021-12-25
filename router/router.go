@@ -62,6 +62,7 @@ func SetupRoutes(app *fiber.App) {
 
 	coupon := api.Group("/iriguchi/coupon")
 	coupon.Post("/send/:emailType", middleware.IsLoggedIn, eh.SendEmail)
+	coupon.Post("/mass/send", middleware.IsLoggedIn, eh.MassCouponEmail)
 	coupon.Post("", middleware.IsLoggedIn, ch.Create)
 	coupon.Get("", middleware.IsLoggedIn, ch.FindAll)
 	coupon.Get("/code/:code", middleware.IsLoggedIn, ch.FindByCode)

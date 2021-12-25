@@ -7,6 +7,7 @@ import (
 
 type EmailRepo interface {
 	Create(email *models.Email) error
+	SendMassEmail(emails *[]string, coupon string) error
 	FindAll(string, bool) (*models.EmailList, error)
 	FindAllByEmail(string, bool, string) (*models.EmailList, error)
 	UpdateEmailStatus(primitive.ObjectID, string) error

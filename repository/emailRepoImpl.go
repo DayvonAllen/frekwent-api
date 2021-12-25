@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"freq/config"
 	"freq/database"
 	"freq/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -28,6 +29,38 @@ func (e EmailRepoImpl) Create(email *models.Email) error {
 	email.UpdatedAt = time.Now()
 
 	_, err := conn.EmailCollection.InsertOne(context.TODO(), email)
+
+	if err != nil {
+		return fmt.Errorf("error processing data")
+	}
+
+	return nil
+}
+
+func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
+	conn := database.ConnectToDB()
+	emailsArr := make([]models.Email, 0, len(*emails))
+
+	for _, em := range *emails {
+		emailsArr = append(emailsArr, models.Email{
+			Id:            primitive.NewObjectID(),
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+			Content:       coupon,
+			Subject:       "coupon status",
+			Status:        "pending",
+			Type:          "couponpromotion",
+			From:          config.Config("BUSINESS_EMAIL"),
+			CustomerEmail: em,
+		})
+	}
+
+	docs := make([]interface{}, 0, len(*emails))
+
+	for _, em := range emailsArr {
+		docs = append(docs, em)
+	}
+	_, err := conn.EmailCollection.InsertMany(context.TODO(), docs)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")

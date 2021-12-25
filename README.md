@@ -99,6 +99,12 @@
     "content": "test customer interaction"
 }
 ```
+- `http://localhost:8080/iriguchi/coupon/mass/send` - mass email coupon codes
+``` 
+{
+    "couponCode": "testcode"
+} 
+```
 ---
 
 ## PUT Routes(All Routes Are Authenticated)

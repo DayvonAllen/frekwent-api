@@ -100,3 +100,39 @@ func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 
 	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "created"})
 }
+
+func (eh *EmailHandler) MassCouponEmail(c *fiber.Ctx) error {
+	c.Accepts("application/json")
+	email := new(models.EmailDto)
+	err := c.BodyParser(email)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	if len(email.CouponCode) == 0 {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
+	}
+
+	_, err = repository.CouponRepoImpl{}.FindByCode(strings.ToLower(email.CouponCode))
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
+	}
+
+	optedInCustomers, err := repository.CustomerRepoImpl{}.FindAllByOptInStatus(true)
+
+	emails := make([]string, 0, len(*optedInCustomers))
+	for _, cus := range *optedInCustomers {
+
+		emails = append(emails, cus.Email)
+	}
+
+	err = eh.EmailService.SendMassEmail(&emails, email.CouponCode)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"status": "success", "message": "success", "data": "created"})
+}

@@ -7,12 +7,23 @@ import (
 
 type EmailService interface {
 	Create(email *models.Email) error
+	SendMassEmail(emails *[]string, coupon string) error
 	FindAll(string, bool) (*models.EmailList, error)
 	FindAllByEmail(string, bool, string) (*models.EmailList, error)
 }
 
 func (e DefaultEmailService) Create(email *models.Email) error {
 	err := e.repo.Create(email)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e DefaultEmailService) SendMassEmail(emails *[]string, coupon string) error {
+	err := e.repo.SendMassEmail(emails, coupon)
 
 	if err != nil {
 		return err
