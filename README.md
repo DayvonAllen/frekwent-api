@@ -169,7 +169,7 @@
     "zipCode": "90044"
 }
 ```
-- `http://localhost:8080/iriguchi/items/category/61c67e137cbc1496a04564de` - update category
+- `http://localhost:8080/iriguchi/items/category/<id>` - update category
 ``` 
 {
     "category": "faceWash"
