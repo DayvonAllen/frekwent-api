@@ -21,6 +21,8 @@
   - `http://localhost:8080/iriguchi/email` - get all emails
   - `http://localhost:8080/iriguchi/email/get/<email address>` - get emails by email address
   - `http://localhost:8080/iriguchi/customer/optin` - get all customers that have opted in to receiving emails
+  - All get all routes have two optional query params, `page`(pretty much pagination), `new`(sorted from newest to oldest)
+    - Ex. `http://localhost:8080/iriguchi/email?page=8&new=false`
 ---
   
 ## POST Routes
