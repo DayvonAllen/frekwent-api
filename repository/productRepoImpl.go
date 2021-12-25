@@ -62,6 +62,8 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool, trending boo
 
 	if trending {
 		findOptions.SetSort(bson.D{{"timesPurchased", -1}})
+		findOptions.SetLimit(3)
+		p.productList.NumberOfProducts = 3
 	} else if newProductQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
@@ -88,18 +90,20 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool, trending boo
 		}
 	}(cur, context.TODO())
 
-	count, err := conn.ProductCollection.CountDocuments(context.TODO(), bson.M{})
+	if p.productList.NumberOfProducts != 3 {
+		count, err := conn.ProductCollection.CountDocuments(context.TODO(), bson.M{})
 
-	if err != nil {
-		panic(err)
+		if err != nil {
+			panic(err)
+		}
+
+		p.productList.NumberOfProducts = count
 	}
-
-	p.productList.NumberOfProducts = count
 
 	if p.productList.NumberOfProducts < 10 {
 		p.productList.NumberOfPages = 1
 	} else {
-		p.productList.NumberOfPages = int(count/10) + 1
+		p.productList.NumberOfPages = int(p.productList.NumberOfProducts/10) + 1
 	}
 
 	p.productList.Products = &p.products
