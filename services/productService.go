@@ -11,6 +11,7 @@ type ProductService interface {
 	FindAll(string, bool) (*models.ProductList, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
+	FindByProductName(string) (*models.Product, error)
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
 	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)
@@ -56,6 +57,16 @@ func (p DefaultProductService) FindAllByCategory(category string, page string, n
 
 func (p DefaultProductService) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
 	product, err := p.repo.FindByProductId(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+func (p DefaultProductService) FindByProductName(name string) (*models.Product, error) {
+	product, err := p.repo.FindByProductName(name)
 
 	if err != nil {
 		return nil, err

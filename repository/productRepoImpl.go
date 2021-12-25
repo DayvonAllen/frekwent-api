@@ -182,6 +182,22 @@ func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product
 	return &p.product, nil
 }
 
+func (p ProductRepoImpl) FindByProductName(name string) (*models.Product, error) {
+	conn := database.ConnectToDB()
+
+	err := conn.ProductCollection.FindOne(context.TODO(), bson.D{{"name", name}}).Decode(&p.product)
+
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return nil, err
+		}
+		return nil, fmt.Errorf("error processing data")
+	}
+
+	return &p.product, nil
+}
+
 func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 

@@ -9,6 +9,7 @@ type ProductRepo interface {
 	Create(product *models.Product) error
 	FindAll(string, bool) (*models.ProductList, error)
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
+	FindByProductName(string) (*models.Product, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)

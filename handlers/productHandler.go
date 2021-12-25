@@ -97,6 +97,18 @@ func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
 }
 
+func (ph *ProductHandler) FindByProductName(c *fiber.Ctx) error {
+	name := c.Params("name")
+
+	product, err := ph.ProductService.FindByProductName(name)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
+}
+
 func (ph *ProductHandler) UpdateName(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 	product := new(models.ProductNameDto)

@@ -40,6 +40,7 @@ func SetupRoutes(app *fiber.App) {
 	purchase := api.Group("/iriguchi/purchases")
 	purchase.Get("/:id", middleware.IsLoggedIn, ph.FindByPurchaseById)
 	purchase.Get("/confirmation/:id", middleware.IsLoggedIn, ph.FindByPurchaseConfirmationId)
+	purchase.Get("/transactions/:state", middleware.IsLoggedIn, ph.CalculateTransactionsByState)
 	purchase.Put("/shipped/:id", middleware.IsLoggedIn, ph.UpdateShippedStatus)
 	purchase.Put("/delivered/:id", middleware.IsLoggedIn, ph.UpdateDeliveredStatus)
 	purchase.Put("/address/:id", middleware.IsLoggedIn, ph.UpdatePurchaseAddress)
@@ -48,6 +49,7 @@ func SetupRoutes(app *fiber.App) {
 
 	items := api.Group("/iriguchi/items")
 	items.Put("/name/:id", middleware.IsLoggedIn, prh.UpdateName)
+	items.Get("/name/:id", middleware.IsLoggedIn, prh.FindByProductName)
 	items.Put("/description/:id", middleware.IsLoggedIn, prh.UpdateDescription)
 	items.Put("/quantity/:id", middleware.IsLoggedIn, prh.UpdateQuantity)
 	items.Put("/ingredients/:id", middleware.IsLoggedIn, prh.UpdateIngredients)

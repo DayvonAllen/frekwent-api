@@ -21,13 +21,12 @@ type Purchase struct {
 	PurchaseConfirmationId string             `bson:"purchaseConfirmationId" json:"purchaseConfirmationId"`
 	PurchaseIntent         string             `bson:"purchaseIntent" json:"purchaseIntent"`
 	TrackingId             string             `bson:"trackingId" json:"trackingId"`
-	//Tax                    int16              `bson:"tax" json:"tax"`
-	Shipped        bool      `bson:"shipped" json:"shipped"`
-	Delivered      bool      `bson:"delivered" json:"delivered"`
-	InfoEmailOptIn bool      `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
-	Refunded       bool      `bson:"refunded" json:"refunded"`
-	CreatedAt      time.Time `bson:"createdAt" json:"-"`
-	UpdatedAt      time.Time `bson:"updatedAt" json:"-"`
+	Shipped                bool               `bson:"shipped" json:"shipped"`
+	Delivered              bool               `bson:"delivered" json:"delivered"`
+	InfoEmailOptIn         bool               `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
+	Refunded               bool               `bson:"refunded" json:"refunded"`
+	CreatedAt              time.Time          `bson:"createdAt" json:"-"`
+	UpdatedAt              time.Time          `bson:"updatedAt" json:"-"`
 }
 
 type PurchaseAddressDTO struct {
@@ -60,4 +59,9 @@ type PurchaseList struct {
 	NumberOfPurchases int64       `json:"numberOfPurchases"`
 	CurrentPage       int         `json:"currentPage"`
 	NumberOfPages     int         `json:"numberOfPages"`
+}
+
+type Transactions struct {
+	TransactionsTotal    int   `json:"transactionsTotal"`
+	NumberOfTransactions int64 `json:"numberOfTransactions"`
 }

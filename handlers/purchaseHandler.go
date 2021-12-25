@@ -57,7 +57,7 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 	purchase := new(models.Purchase)
 	err := c.BodyParser(purchase)
-	
+
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
@@ -87,6 +87,18 @@ func (ph *PurchaseHandler) FindByPurchaseConfirmationId(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
+}
+
+func (ph *PurchaseHandler) CalculateTransactionsByState(c *fiber.Ctx) error {
+	state := c.Params("state")
+
+	t, err := ph.PurchaseService.CalculateTransactionsByState(state)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": t})
 }
 
 func (ph *PurchaseHandler) UpdateShippedStatus(c *fiber.Ctx) error {

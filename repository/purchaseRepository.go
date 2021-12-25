@@ -10,6 +10,7 @@ type PurchaseRepo interface {
 	FindAll(string, bool) (*models.PurchaseList, error)
 	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
 	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
+	CalculateTransactionsByState(string) (*models.Transactions, error)
 	UpdateShippedStatus(*models.PurchaseShippedDTO) error
 	UpdateDeliveredStatus(*models.PurchaseDeliveredDTO) error
 	UpdatePurchaseAddress(*models.PurchaseAddressDTO) error

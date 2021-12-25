@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -22,6 +23,7 @@ type PurchaseRepoImpl struct {
 	purchase     models.Purchase
 	purchases    []models.Purchase
 	purchaseList models.PurchaseList
+	transaction  models.Transactions
 }
 
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
@@ -132,6 +134,54 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 	p.purchaseList.CurrentPage = pageNumber
 
 	return &p.purchaseList, nil
+}
+
+func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Transactions, error) {
+	conn := database.ConnectToDB()
+
+	var filter bson.D
+
+	if strings.ToLower(state) == "all" {
+		filter = bson.D{{"refunded", false}}
+	} else {
+		filter = bson.D{{"state", state}, {"refunded", false}}
+	}
+	
+	cur, err := conn.PurchaseCollection.Find(context.TODO(), filter)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cur.All(context.TODO(), &p.purchases); err != nil {
+		panic(err)
+	}
+
+	if p.purchases == nil {
+		return nil, errors.New("no transactions in the database")
+	}
+
+	// Close the cursor once finished
+	defer func(cur *mongo.Cursor, ctx context.Context) {
+		err := cur.Close(ctx)
+		if err != nil {
+			panic(fmt.Errorf("error processing data"))
+		}
+	}(cur, context.TODO())
+
+	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), filter)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, pur := range p.purchases {
+		p.transaction.TransactionsTotal = int(pur.FinalPrice + int16(p.transaction.TransactionsTotal))
+	}
+
+	p.transaction.NumberOfTransactions = count
+
+	return &p.transaction, nil
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {

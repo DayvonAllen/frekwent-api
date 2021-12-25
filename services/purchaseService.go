@@ -11,6 +11,7 @@ type PurchaseService interface {
 	FindAll(string, bool) (*models.PurchaseList, error)
 	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
 	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
+	CalculateTransactionsByState(string) (*models.Transactions, error)
 	UpdateShippedStatus(*models.PurchaseShippedDTO) error
 	UpdateDeliveredStatus(*models.PurchaseDeliveredDTO) error
 	UpdatePurchaseAddress(*models.PurchaseAddressDTO) error
@@ -59,6 +60,16 @@ func (p DefaultPurchaseService) FindByPurchaseConfirmationId(id string) (*models
 	}
 
 	return purchase, nil
+}
+
+func (p DefaultPurchaseService) CalculateTransactionsByState(state string) (*models.Transactions, error) {
+	t, err := p.repo.CalculateTransactionsByState(state)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
 }
 
 func (p DefaultPurchaseService) UpdateShippedStatus(shipped *models.PurchaseShippedDTO) error {
