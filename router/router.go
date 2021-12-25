@@ -49,7 +49,7 @@ func SetupRoutes(app *fiber.App) {
 
 	items := api.Group("/iriguchi/items")
 	items.Put("/name/:id", middleware.IsLoggedIn, prh.UpdateName)
-	items.Get("/name/:id", middleware.IsLoggedIn, prh.FindByProductName)
+	items.Get("/name", middleware.IsLoggedIn, prh.FindByProductName)
 	items.Put("/description/:id", middleware.IsLoggedIn, prh.UpdateDescription)
 	items.Put("/quantity/:id", middleware.IsLoggedIn, prh.UpdateQuantity)
 	items.Put("/ingredients/:id", middleware.IsLoggedIn, prh.UpdateIngredients)

@@ -98,7 +98,7 @@ func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
 }
 
 func (ph *ProductHandler) FindByProductName(c *fiber.Ctx) error {
-	name := c.Params("name")
+	name := c.Query("name")
 
 	product, err := ph.ProductService.FindByProductName(name)
 

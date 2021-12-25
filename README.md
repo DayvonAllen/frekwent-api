@@ -21,11 +21,13 @@
   - `http://localhost:8080/iriguchi/email` - get all emails
   - `http://localhost:8080/iriguchi/email/get/<email address>` - get emails by email address
   - `http://localhost:8080/iriguchi/customer/optin` - get all customers that have opted in to receiving emails
-  - All get all routes have two optional query params, `page`(pretty much pagination), `new`(sorted from newest to oldest)
+  - All the get all routes above have two optional query params, `page`(pretty much pagination), `new`(sorted from newest to oldest)
     - Ex. `http://localhost:8080/iriguchi/email?page=8&new=false`
   - `http://localhost:8080/iriguchi/purchases/transactions/<state>` - get all transactions
-    - `http://localhost:8080/iriguchi/purchases/transactions/ca` - california
+    - `http://localhost:8080/iriguchi/purchases/transactions/ca` - California
     - `http://localhost:8080/iriguchi/purchases/transactions/all` - all states
+  - `http://localhost:8080/iriguchi/items/name?name=<name>` - gets a product by name
+    - `http://localhost:8080/iriguchi/items/name?name=test product`
 ---
   
 ## POST Routes
