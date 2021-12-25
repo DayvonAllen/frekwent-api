@@ -339,7 +339,7 @@ func (c CustomerRepoImpl) FindAllByOptInStatus(optIn bool) (*[]models.Customer, 
 	}
 
 	if c.customers == nil {
-		return nil, errors.New("error finding customers")
+		return nil, errors.New("no customers have opted in")
 	}
 
 	// Close the cursor once finished
