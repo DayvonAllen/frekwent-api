@@ -39,7 +39,7 @@ func (e EmailRepoImpl) Create(email *models.Email) error {
 
 func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 	conn := database.ConnectToDB()
-	emailsArr := make([]models.Email, 0, len(*emails))
+	emailsArr := make([]interface{}, 0, len(*emails))
 
 	for _, em := range *emails {
 		emailsArr = append(emailsArr, models.Email{
@@ -55,13 +55,7 @@ func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 		})
 	}
 
-	docs := make([]interface{}, 0, len(*emails))
-
-	for _, em := range emailsArr {
-		docs = append(docs, em)
-	}
-	
-	_, err := conn.EmailCollection.InsertMany(context.TODO(), docs)
+	_, err := conn.EmailCollection.InsertMany(context.TODO(), emailsArr)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")
