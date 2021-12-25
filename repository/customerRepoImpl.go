@@ -26,8 +26,6 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 	conn := database.ConnectToDB()
 
 	err := conn.CustomerCollection.FindOne(context.TODO(), bson.D{
-		{"firstName", customer.FirstName},
-		{"lastName", customer.LastName},
 		{"email", customer.Email},
 	}).Decode(&c.customer)
 
