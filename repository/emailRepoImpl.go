@@ -60,6 +60,7 @@ func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 	for _, em := range emailsArr {
 		docs = append(docs, em)
 	}
+	
 	_, err := conn.EmailCollection.InsertMany(context.TODO(), docs)
 
 	if err != nil {
