@@ -11,6 +11,7 @@ type ProductRepo interface {
 	FindByProductId(primitive.ObjectID) (*models.Product, error)
 	FindByProductName(string) (*models.Product, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
+	UpdatePurchaseCount(string) error
 	UpdateName(string, primitive.ObjectID) (*models.Product, error)
 	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
 	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)

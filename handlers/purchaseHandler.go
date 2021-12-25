@@ -67,6 +67,10 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 	purchase.FirstName = strings.ToLower(purchase.FirstName)
 	purchase.LastName = strings.ToLower(purchase.LastName)
 	purchase.Email = strings.ToLower(purchase.Email)
+	purchase.State = strings.ToLower(purchase.State)
+	purchase.City = strings.ToLower(purchase.City)
+	purchase.StreetAddress = strings.ToLower(purchase.StreetAddress)
+	purchase.OptionalAddress = strings.ToLower(purchase.OptionalAddress)
 
 	err = ph.PurchaseService.Purchase(purchase)
 

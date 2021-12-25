@@ -127,7 +127,7 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 	encrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(6)
+	wg.Add(5)
 
 	go func() {
 		defer wg.Done()
@@ -178,17 +178,6 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 
 	go func() {
 		defer wg.Done()
-		pi, err := encrypt.Encrypt(purchase.State)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.State = pi
-	}()
-
-	go func() {
-		defer wg.Done()
 		pi, err := encrypt.Encrypt(purchase.ZipCode)
 
 		if err != nil {
@@ -209,7 +198,7 @@ func DecryptPI(purchase *models.Purchase) *models.Purchase {
 	decrypt := Encryption{Key: []byte(key)}
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(4)
 
 	go func() {
 		defer wg.Done()
@@ -245,17 +234,6 @@ func DecryptPI(purchase *models.Purchase) *models.Purchase {
 		}
 
 		purchase.City = pi
-	}()
-
-	go func() {
-		defer wg.Done()
-		pi, err := decrypt.Decrypt(purchase.State)
-
-		if err != nil {
-			panic(err)
-		}
-
-		purchase.State = pi
 	}()
 
 	go func() {

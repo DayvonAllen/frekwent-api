@@ -73,6 +73,16 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		}
 	}(conn)
 
+	go func(connection *database.Connection) {
+		repo := ProductRepoImpl{}
+		for _, product := range *purchase.PurchasedItems {
+			err := repo.UpdatePurchaseCount(product.Name)
+			if err != nil {
+				return
+			}
+		}
+	}(conn)
+
 	return nil
 }
 
@@ -146,7 +156,7 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 	} else {
 		filter = bson.D{{"state", state}, {"refunded", false}}
 	}
-	
+
 	cur, err := conn.PurchaseCollection.Find(context.TODO(), filter)
 
 	if err != nil {

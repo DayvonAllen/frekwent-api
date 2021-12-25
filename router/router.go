@@ -38,9 +38,9 @@ func SetupRoutes(app *fiber.App) {
 	optOut.Get("/:email", crh.UpdateOptInStatus)
 
 	purchase := api.Group("/iriguchi/purchases")
+	purchase.Get("/transactions/:state", middleware.IsLoggedIn, ph.CalculateTransactionsByState)
 	purchase.Get("/:id", middleware.IsLoggedIn, ph.FindByPurchaseById)
 	purchase.Get("/confirmation/:id", middleware.IsLoggedIn, ph.FindByPurchaseConfirmationId)
-	purchase.Get("/transactions/:state", middleware.IsLoggedIn, ph.CalculateTransactionsByState)
 	purchase.Put("/shipped/:id", middleware.IsLoggedIn, ph.UpdateShippedStatus)
 	purchase.Put("/delivered/:id", middleware.IsLoggedIn, ph.UpdateDeliveredStatus)
 	purchase.Put("/address/:id", middleware.IsLoggedIn, ph.UpdatePurchaseAddress)

@@ -250,6 +250,23 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) 
 	return &p.product, nil
 }
 
+func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
+	conn := database.ConnectToDB()
+
+	opts := options.FindOneAndUpdate()
+	filter := bson.D{{"name", name}}
+	update := bson.M{"$inc": bson.M{"timesPurchased": 1}, "$set": bson.D{{"updatedAt", time.Now()}}}
+
+	err := conn.ProductCollection.FindOneAndUpdate(context.TODO(),
+		filter, update, opts).Decode(&p.product)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.ConnectToDB()
 
