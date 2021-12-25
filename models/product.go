@@ -7,11 +7,11 @@ import (
 
 type Product struct {
 	Id             primitive.ObjectID `bson:"_id" json:"id"`
-	Name           string             `bson:"name" json:"name" validate:"max=60,min=1"`
+	Name           string             `bson:"name" json:"name"`
 	Images         []string           `bson:"images" json:"images"`
 	Price          string             `bson:"price" json:"price"`
 	Quantity       uint16             `bson:"quantity" json:"quantity"`
-	Description    string             `bson:"description" json:"description" validate:"max=450,min=1"`
+	Description    string             `bson:"description" json:"description"`
 	Ingredients    []string           `bson:"ingredients" json:"ingredients"`
 	Category       string             `bson:"category" json:"category"`
 	TimesPurchased int                `bson:"timesPurchased" json:"timesPurchased"`
@@ -20,7 +20,7 @@ type Product struct {
 }
 
 type ProductNameDto struct {
-	Name string `bson:"name" json:"name" validate:"max=60,min=1"`
+	Name string `bson:"name" json:"name"`
 }
 
 type ProductPriceDto struct {
@@ -32,7 +32,7 @@ type ProductQuantityDto struct {
 }
 
 type ProductDescriptionDto struct {
-	Description string `bson:"description" json:"description" validate:"max=450,min=1"`
+	Description string `bson:"description" json:"description"`
 }
 
 type ProductIngredientsDto struct {

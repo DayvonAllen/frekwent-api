@@ -25,11 +25,30 @@ func (ph *ProductHandler) Create(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
+	err = helper.ValidateData(product.Category, "Category", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(product.Name, "Name", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(product.Description, "Description", 1, 120)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
 	if !helper.IsValidPrice(product.Price) {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", errors.New("invalid price"))})
 	}
 
 	product.Category = strings.ToLower(product.Category)
+	product.Name = strings.ToLower(product.Name)
 
 	err = ph.ProductService.Create(product)
 
@@ -125,6 +144,12 @@ func (ph *ProductHandler) UpdateName(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
+	err = helper.ValidateData(product.Name, "Name", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
 	id := c.Params("id")
 
 	monId, err := primitive.ObjectIDFromHex(id)
@@ -179,6 +204,12 @@ func (ph *ProductHandler) UpdateDescription(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(product.Description, "Description", 1, 120)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
 	id := c.Params("id")
@@ -257,6 +288,12 @@ func (ph *ProductHandler) UpdateCategory(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(product.Category, "Category", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
 	id := c.Params("id")

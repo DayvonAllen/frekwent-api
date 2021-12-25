@@ -267,3 +267,11 @@ func CreateEmail(email *models.Email, emailDto *models.EmailDto, emailType strin
 
 	return email
 }
+
+func ValidateData(data string, dataType string, min int, max int) error {
+	if len(data) >= min && len(data) <= max {
+		return nil
+	}
+
+	return fmt.Errorf("%s must be at least %v and at most %v characters", dataType, min, max)
+}

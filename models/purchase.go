@@ -7,14 +7,14 @@ import (
 
 type Purchase struct {
 	Id                     primitive.ObjectID `bson:"_id" json:"id"`
-	FirstName              string             `bson:"firstName" json:"firstName" validate:"max=60,min=1"`
-	LastName               string             `bson:"lastName" json:"lastName" validate:"max=60,min=1"`
-	Email                  string             `bson:"email" json:"email" validate:"max=60,min=1"`
-	StreetAddress          string             `bson:"streetAddress" json:"streetAddress" validate:"max=60,min=1"`
-	OptionalAddress        string             `bson:"optionalAddress" json:"optionalAddress" validate:"max=60"`
-	City                   string             `bson:"city" json:"city" validate:"max=60,min=1"`
-	State                  string             `bson:"state" json:"state" validate:"max=60,min=1"`
-	ZipCode                string             `bson:"zipCode" json:"zipCode" validate:"max=60,min=1"`
+	FirstName              string             `bson:"firstName" json:"firstName"`
+	LastName               string             `bson:"lastName" json:"lastName"`
+	Email                  string             `bson:"email" json:"email"`
+	StreetAddress          string             `bson:"streetAddress" json:"streetAddress"`
+	OptionalAddress        string             `bson:"optionalAddress" json:"optionalAddress"`
+	City                   string             `bson:"city" json:"city"`
+	State                  string             `bson:"state" json:"state"`
+	ZipCode                string             `bson:"zipCode" json:"zipCode"`
 	PurchasedItems         *[]Product         `bson:"purchasedItems" json:"purchasedItems"`
 	FinalPrice             int16              `bson:"finalPrice" json:"finalPrice"`
 	CouponUsed             Coupon             `bson:"couponUsed" json:"couponUsed"`
@@ -31,11 +31,11 @@ type Purchase struct {
 
 type PurchaseAddressDTO struct {
 	Id              primitive.ObjectID `json:"id"`
-	StreetAddress   string             `json:"streetAddress" validate:"max=60,min=1"`
-	OptionalAddress string             `json:"optionalAddress" validate:"max=60"`
-	City            string             `json:"city" validate:"max=60,min=1"`
-	State           string             `json:"state" validate:"max=60,min=1"`
-	ZipCode         string             `json:"zipCode" validate:"max=60,min=1"`
+	StreetAddress   string             `json:"streetAddress"`
+	OptionalAddress string             `json:"optionalAddress"`
+	City            string             `json:"city"`
+	State           string             `json:"state"`
+	ZipCode         string             `json:"zipCode"`
 }
 
 type PurchaseDeliveredDTO struct {
@@ -46,12 +46,12 @@ type PurchaseDeliveredDTO struct {
 type PurchaseShippedDTO struct {
 	Id         primitive.ObjectID `json:"id"`
 	Shipped    bool               `json:"shipped"`
-	TrackingId string             `json:"trackingId" validate:"max=150,min=1"`
+	TrackingId string             `json:"trackingId"`
 }
 
 type PurchaseTrackingDTO struct {
 	Id         primitive.ObjectID `json:"id"`
-	TrackingId string             `json:"trackingId" validate:"max=150,min=1"`
+	TrackingId string             `json:"trackingId"`
 }
 
 type PurchaseList struct {

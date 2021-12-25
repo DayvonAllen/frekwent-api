@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"freq/helper"
 	"freq/models"
 	"freq/services"
 	"github.com/gofiber/fiber/v2"
@@ -60,6 +61,36 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.StreetAddress, "Street Address", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.OptionalAddress, "Optional Address", 0, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.ZipCode, "Zip Code", 1, 20)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.State, "State", 2, 20)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.City, "City", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
 	purchase.Id = primitive.NewObjectID()
@@ -170,6 +201,36 @@ func (ph *PurchaseHandler) UpdatePurchaseAddress(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
+	err = helper.ValidateData(purchase.StreetAddress, "Street Address", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.OptionalAddress, "Optional Address", 0, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.ZipCode, "Zip Code", 5, 10)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.State, "State", 2, 20)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	err = helper.ValidateData(purchase.City, "City", 1, 60)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
 	id := c.Params("id")
 
 	monId, err := primitive.ObjectIDFromHex(id)
@@ -179,6 +240,11 @@ func (ph *PurchaseHandler) UpdatePurchaseAddress(c *fiber.Ctx) error {
 	}
 
 	purchase.Id = monId
+
+	purchase.State = strings.ToLower(purchase.State)
+	purchase.City = strings.ToLower(purchase.City)
+	purchase.StreetAddress = strings.ToLower(purchase.StreetAddress)
+	purchase.OptionalAddress = strings.ToLower(purchase.OptionalAddress)
 
 	err = ph.PurchaseService.UpdatePurchaseAddress(purchase)
 
