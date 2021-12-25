@@ -43,6 +43,7 @@ func (ph *ProductHandler) Create(c *fiber.Ctx) error {
 func (ph *ProductHandler) FindAll(c *fiber.Ctx) error {
 	page := c.Query("page", "1")
 	newProductQuery := c.Query("new", "false")
+	trending := c.Query("trending", "false")
 
 	isNew, err := strconv.ParseBool(newProductQuery)
 
@@ -50,7 +51,13 @@ func (ph *ProductHandler) FindAll(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid value")})
 	}
 
-	products, err := ph.ProductService.FindAll(page, isNew)
+	isTrending, err := strconv.ParseBool(trending)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid value")})
+	}
+
+	products, err := ph.ProductService.FindAll(page, isNew, isTrending)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})

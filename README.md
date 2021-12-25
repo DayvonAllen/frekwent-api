@@ -4,6 +4,10 @@
 ## GET Routes
 - No auth routes:
   - `http://localhost:8080/products`- gets all products
+    - `http://localhost:8080/products?trending=true` - get all trending products
+    - `http://localhost:8080/products?new=true` - get all products sorted from newest to oldest
+    - `http://localhost:8080/products?page=2` - get all products from page 2 of the pagination
+    - `http://localhost:8080/products?page=2&new=true` - get all products from page 2 of the pagination sorted from newest to oldest
   - `http://localhost:8080/products/<id>` - get product by ID
   - `http://localhost:8080/list/optout/<email>` - opt out of emails
   - `http://localhost:8080/products/category/<category>` - get all products by category

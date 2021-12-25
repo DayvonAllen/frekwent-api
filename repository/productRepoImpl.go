@@ -46,7 +46,7 @@ func (p ProductRepoImpl) Create(product *models.Product) error {
 	return errors.New("product with that name already exists")
 }
 
-func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.ProductList, error) {
+func (p ProductRepoImpl) FindAll(page string, newProductQuery bool, trending bool) (*models.ProductList, error) {
 	conn := database.ConnectToDB()
 
 	findOptions := options.FindOptions{}
@@ -60,7 +60,9 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool) (*models.Pro
 	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
 	findOptions.SetLimit(int64(perPage))
 
-	if newProductQuery {
+	if trending {
+		findOptions.SetSort(bson.D{{"timesPurchased", -1}})
+	} else if newProductQuery {
 		findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
