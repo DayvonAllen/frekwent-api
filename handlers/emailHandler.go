@@ -58,6 +58,36 @@ func (eh *EmailHandler) FindAllByEmail(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": emails})
 }
 
+func (eh *EmailHandler) FindAllByStatus(c *fiber.Ctx) error {
+	page := c.Query("page", "1")
+	newEmailQuery := c.Query("new", "false")
+	status := strings.ToLower(c.Params("status"))
+
+	isNew, err := strconv.ParseBool(newEmailQuery)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid value")})
+	}
+
+	var statusQuery models.Status
+
+	if status == "success" {
+		statusQuery = models.Success
+	} else if status == "pending" {
+		statusQuery = models.Pending
+	} else {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid status")})
+	}
+	
+	emails, err := eh.EmailService.FindAllByStatus(page, isNew, &statusQuery)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": emails})
+}
+
 func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 	emailType := strings.ToLower(c.Params("emailType"))
 	var eType models.EmailType
