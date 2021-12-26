@@ -48,8 +48,8 @@ func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 			UpdatedAt:     time.Now(),
 			Content:       coupon,
 			Subject:       "coupon status",
-			Status:        "pending",
-			Type:          "couponpromotion",
+			Status:        models.Pending,
+			Type:          models.CouponPromotion,
 			From:          config.Config("BUSINESS_EMAIL"),
 			CustomerEmail: em,
 		})

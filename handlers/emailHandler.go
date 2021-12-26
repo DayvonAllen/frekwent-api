@@ -60,6 +60,7 @@ func (eh *EmailHandler) FindAllByEmail(c *fiber.Ctx) error {
 
 func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 	emailType := strings.ToLower(c.Params("emailType"))
+	var eType models.EmailType
 	c.Accepts("application/json")
 	email := new(models.EmailDto)
 	err := c.BodyParser(email)
@@ -73,6 +74,7 @@ func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Customer email does not exist"})
 		}
+		eType = models.CustomerInteraction
 	} else if emailType == "couponpromotion" {
 		if len(email.CouponCode) == 0 {
 			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
@@ -86,11 +88,13 @@ func (eh *EmailHandler) SendEmail(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
 		}
+
+		eType = models.CouponPromotion
 	} else {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid email type"})
 	}
 
-	createdEmail := helper.CreateEmail(new(models.Email), email, emailType)
+	createdEmail := helper.CreateEmail(new(models.Email), email, eType)
 
 	err = eh.EmailService.Create(createdEmail)
 

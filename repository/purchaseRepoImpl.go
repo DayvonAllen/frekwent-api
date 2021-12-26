@@ -63,8 +63,8 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		email.From = emailAdd
 		email.Subject = "test subject"
 		email.Content = "test content"
-		email.Type = "purchase"
-		email.Status = "pending"
+		email.Type = models.Purchased
+		email.Status = models.Pending
 
 		err := EmailRepoImpl{}.Create(email)
 

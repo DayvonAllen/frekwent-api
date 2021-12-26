@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"freq/database"
+	"freq/events"
 	"freq/models"
 	"freq/router"
 	"go.mongodb.org/mongo-driver/bson"
@@ -41,6 +42,8 @@ func init() {
 			}
 		}
 	}
+
+	go events.CreateConsumer()
 
 	//_, err = conn.PurchaseCollection.DeleteMany(context.TODO(), bson.M{})
 	//if err != nil {
