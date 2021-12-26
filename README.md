@@ -25,6 +25,9 @@
   - `http://localhost:8080/iriguchi/email` - get all emails
   - `http://localhost:8080/iriguchi/email/get/<email address>` - get emails by email address
   - `http://localhost:8080/iriguchi/customer/optin` - get all customers that have opted in to receiving emails
+  - `http://localhost:8080/iriguchi/email/status/<status>` - get all emails by status
+    - `http://localhost:8080/iriguchi/email/status/success`
+    - `http://localhost:8080/iriguchi/email/status/pending`
   - All the get all routes above have two optional query params, `page`(pretty much pagination), `new`(sorted from newest to oldest)
     - Ex. `http://localhost:8080/iriguchi/email?page=8&new=false`
   - `http://localhost:8080/iriguchi/purchases/transactions/<state>` - get all transactions
