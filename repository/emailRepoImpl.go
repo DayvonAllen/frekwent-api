@@ -184,11 +184,11 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 	return &e.emailList, nil
 }
 
-func (e EmailRepoImpl) UpdateEmailStatus(id primitive.ObjectID, status string) error {
+func (e EmailRepoImpl) UpdateEmailStatus(id primitive.ObjectID, status models.Status) error {
 	conn := database.ConnectToDB()
 
-	_, err := conn.EmailCollection.UpdateByID(context.TODO(), id, bson.D{{"updatedAt", time.Now()},
-		{"status", status}})
+	_, err := conn.EmailCollection.UpdateByID(context.TODO(), id, bson.D{{"$set",
+		bson.D{{"updatedAt", time.Now()}, {"status", status}}}})
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection

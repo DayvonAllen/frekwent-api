@@ -71,6 +71,8 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		if err != nil {
 			log.Println(errors.New(fmt.Sprintf("error sending an email to %s", email.CustomerEmail)))
 		}
+
+		go ProducerMessage(email)
 	}(conn)
 
 	go func(connection *database.Connection) {
