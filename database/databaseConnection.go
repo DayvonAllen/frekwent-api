@@ -21,14 +21,12 @@ type Connection struct {
 }
 
 func ConnectToDB() *Connection {
-	p := config.Config("DB_PORT")
-	n := config.Config("DB_NAME")
-	h := config.Config("DB_HOST")
+	u := config.Config("DB_URL")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(n+h+p))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(u))
 
 	if err != nil {
 		panic(err)
