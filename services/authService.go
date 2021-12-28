@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"freq/models"
 	"freq/repository"
 )
@@ -16,6 +17,7 @@ type DefaultAuthService struct {
 func (a DefaultAuthService) Login(username string, password string, ip string) (*models.User, string, error) {
 	u, token, err := a.repo.Login(username, password, ip)
 	if err != nil {
+		fmt.Println(err)
 		return nil, "", err
 	}
 	return u, token, nil

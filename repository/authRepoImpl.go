@@ -30,7 +30,7 @@ func (a AuthRepoImpl) Login(username string, password string, ip string) (*model
 
 	} else {
 		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"username",
-			username}}).Decode(a.user)
+			username}}).Decode(&a.user)
 
 		if err != nil {
 			return nil, "", fmt.Errorf("error finding by username")

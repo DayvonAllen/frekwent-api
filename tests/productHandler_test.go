@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -205,6 +205,8 @@ func TestProductHandler_Create(t *testing.T) {
 	}
 
 	os.Setenv("DB_URL", "mongodb://localhost:27017")
+	os.Setenv("SECRET", "test")
+	os.Setenv("EXPIRATION", "120000")
 
 	defer func(pool *dockertest.Pool, r *dockertest.Resource) {
 		err := pool.Purge(r)
@@ -213,7 +215,12 @@ func TestProductHandler_Create(t *testing.T) {
 		}
 	}(pool, resource)
 
-	//b, _ := json.Marshal(&models.User{Email: "a@a.com", Username: "a", Password: "pass"})
+	conn := database.ConnectToDB()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+
+	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "hdoe@gmail.com", Username: "hdoe", Password: string(hashedPassword),
+		Id: primitive.NewObjectID()})
 
 	tests := []struct {
 		description string
@@ -229,6 +236,7 @@ func TestProductHandler_Create(t *testing.T) {
 		query         string
 		queryValue    string
 		body          []byte
+		product       []byte
 	}{
 		{
 			description:   "unauthorized",
@@ -240,22 +248,21 @@ func TestProductHandler_Create(t *testing.T) {
 			query:         "",
 			queryValue:    "",
 			body:          nil,
+			product:       nil,
 		},
-		//{
-		//	description:   "logged in - create products",
-		//	route:         "/iriguchi/items",
-		//	expectedError: false,
-		//	expectedCode:  201,
-		//	expectedBody:  true,
-		//	evaluator:     "",
-		//	query:         "",
-		//	queryValue:    "",
-		//	body:          b,
-		//},
+		{
+			description:   "logged in - create products",
+			route:         "/iriguchi/items",
+			expectedError: false,
+			expectedCode:  201,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			product:       []byte(`{"name": "test product5", "images": [], "price": "10.01", "quantity": 20, "description": "desc...", "ingredients": [], "category": "faceWash"}`),
+		},
 	}
-
-	conn := database.ConnectToDB()
-	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "a@a.com", Username: "a", Password: "pass"})
 
 	// Setup the app as it is done in the main function
 	app := router.Setup()
@@ -267,21 +274,17 @@ func TestProductHandler_Create(t *testing.T) {
 		req, _ := http.NewRequest(
 			"POST",
 			test.route,
-			nil,
+			bytes.NewBuffer(test.product),
 		)
 
-		q := req.URL.Query()
-		q.Add(test.query, test.queryValue)
-		req.URL.RawQuery = q.Encode()
-
 		if strings.Contains(test.description, "logged in") {
-			data := url.Values{"email": {}}
-			data.Set("body", "{email: a@a.com, password: pass}")
 			re, _ := http.NewRequest(
 				"POST",
 				"/iriguchi/auth/login",
-				bytes.NewBufferString(data.Encode()),
+				bytes.NewBuffer(test.body),
 			)
+
+			re.Header.Set("Content-Type", "application/json")
 
 			myR, _ := app.Test(re, -1)
 
@@ -314,6 +317,8 @@ func TestProductHandler_Create(t *testing.T) {
 		// Reading the response body should work everytime, such that
 		// the err variable should be nil
 		assert.Nilf(t, err, test.description)
+
+		fmt.Println(string(body))
 
 		// Verify, that the response body equals the expected body
 		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
