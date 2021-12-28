@@ -10,11 +10,7 @@ import (
 
 func ProducerMessage(email *models.Email) {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": config.Config("BOOTSTRAP_SERVER"),
-		"security.protocol": "SASL_SSL",
-		"sasl.username":     config.Config("USERNAME"),
-		"sasl.password":     config.Config("PASSWORD"),
-		"sasl.mechanism":    "PLAIN",
+		"bootstrap.servers": "localhost:19092",
 	})
 
 	if err != nil {
