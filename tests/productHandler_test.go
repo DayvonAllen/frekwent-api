@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/goleak"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
@@ -23,6 +24,10 @@ import (
 
 var resource *dockertest.Resource
 var pool *dockertest.Pool
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestProductHandler_FindAll(t *testing.T) {
 	p, err := dockertest.NewPool("")
