@@ -356,10 +356,10 @@ func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) 
 func (p ProductRepoImpl) DeleteById(id primitive.ObjectID) error {
 	conn := database.ConnectToDB()
 
-	_, err := conn.ProductCollection.DeleteOne(context.TODO(), bson.D{{"_id", id}})
+	res, _ := conn.ProductCollection.DeleteOne(context.TODO(), bson.D{{"_id", id}})
 
-	if err != nil {
-		return fmt.Errorf("error processing data")
+	if res.DeletedCount == 0 {
+		return errors.New("failed to delete product")
 	}
 
 	return nil

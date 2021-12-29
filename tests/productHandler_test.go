@@ -1451,3 +1451,736 @@ func TestProductHandler_UpdateDescription(t *testing.T) {
 		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
 	}
 }
+
+func TestProductHandler_UpdateQuantity(t *testing.T) {
+	p, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("could not connect to docker: %s", err)
+	}
+
+	pool = p
+
+	opts := dockertest.RunOptions{
+		Repository:   "mongo",
+		Tag:          "latest",
+		ExposedPorts: []string{"27017"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"27017": {
+				{HostIP: "0.0.0.0", HostPort: "27017"},
+			},
+		},
+	}
+
+	resource, err = pool.RunWithOptions(&opts)
+	if err != nil {
+		_ = pool.Purge(resource)
+		log.Fatalf("could not start resource: %s", err)
+	}
+
+	os.Setenv("DB_URL", "mongodb://localhost:27017")
+	os.Setenv("SECRET", "test")
+	os.Setenv("EXPIRATION", "120000")
+
+	defer func(pool *dockertest.Pool, r *dockertest.Resource) {
+		err := pool.Purge(r)
+		if err != nil {
+
+		}
+	}(pool, resource)
+
+	conn := database.ConnectToDB()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+
+	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "hdoe@gmail.com", Username: "hdoe", Password: string(hashedPassword),
+		Id: primitive.NewObjectID()})
+
+	monId, _ := primitive.ObjectIDFromHex("61c32a0a61d12a5f03b73fc7")
+
+	conn.ProductCollection.InsertOne(context.TODO(), &models.Product{
+		Ingredients:    []string{""},
+		Images:         []string{""},
+		Id:             monId,
+		Quantity:       10,
+		Description:    "TEST",
+		Price:          "12.20",
+		Category:       "facewash",
+		TimesPurchased: 0,
+		Name:           "test",
+	})
+
+	tests := []struct {
+		description string
+
+		// Test input
+		route string
+
+		// Expected output
+		expectedError bool
+		expectedCode  int
+		expectedBody  bool
+		evaluator     string
+		query         string
+		queryValue    string
+		body          []byte
+		name          []byte
+	}{
+		{
+			description:   "logged in - update quantity successfully",
+			route:         "/iriguchi/items/quantity/61c32a0a61d12a5f03b73fc7",
+			expectedError: false,
+			expectedCode:  200,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"quantity": 1}`),
+		},
+		{
+			description:   "logged in - fail to quantity",
+			route:         "/iriguchi/items/quantity/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"quantity": 1}`),
+		},
+		{
+			description:   "logged in - invalid id quantity",
+			route:         "/iriguchi/items/quantity/dl",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"quantity": 1}`),
+		},
+		{
+			description:   "logged in - invalid json quantity",
+			route:         "/iriguchi/items/quantity/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"quantity" 0}`),
+		},
+	}
+
+	// Setup the app as it is done in the main function
+	app := router.Setup()
+
+	// Iterate through test single test cases
+	for _, test := range tests {
+		// Create a new http request with the route
+		// from the test case
+		req, _ := http.NewRequest(
+			"PUT",
+			test.route,
+			bytes.NewBuffer(test.name),
+		)
+
+		if strings.Contains(test.description, "logged in") {
+			re, _ := http.NewRequest(
+				"POST",
+				"/iriguchi/auth/login",
+				bytes.NewBuffer(test.body),
+			)
+
+			re.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+			myR, _ := app.Test(re, -1)
+
+			c := myR.Cookies()
+
+			myc := c[0]
+
+			req.AddCookie(myc)
+		}
+
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		// Perform the request plain with the app.
+		// The -1 disables request latency.
+		res, err := app.Test(req, -1)
+
+		// verify that no error occured, that is not expected
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		// As expected errors lead to broken responses, the next
+		// test case needs to be processed
+		if test.expectedError {
+			continue
+		}
+
+		// Verify if the status code is as expected
+		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+
+		// Read the response body
+		body, err := ioutil.ReadAll(res.Body)
+
+		// Reading the response body should work everytime, such that
+		// the err variable should be nil
+		assert.Nilf(t, err, test.description)
+
+		// Verify, that the response body equals the expected body
+		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
+	}
+}
+
+func TestProductHandler_UpdateIngredients(t *testing.T) {
+	p, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("could not connect to docker: %s", err)
+	}
+
+	pool = p
+
+	opts := dockertest.RunOptions{
+		Repository:   "mongo",
+		Tag:          "latest",
+		ExposedPorts: []string{"27017"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"27017": {
+				{HostIP: "0.0.0.0", HostPort: "27017"},
+			},
+		},
+	}
+
+	resource, err = pool.RunWithOptions(&opts)
+	if err != nil {
+		_ = pool.Purge(resource)
+		log.Fatalf("could not start resource: %s", err)
+	}
+
+	os.Setenv("DB_URL", "mongodb://localhost:27017")
+	os.Setenv("SECRET", "test")
+	os.Setenv("EXPIRATION", "120000")
+
+	defer func(pool *dockertest.Pool, r *dockertest.Resource) {
+		err := pool.Purge(r)
+		if err != nil {
+
+		}
+	}(pool, resource)
+
+	conn := database.ConnectToDB()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+
+	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "hdoe@gmail.com", Username: "hdoe", Password: string(hashedPassword),
+		Id: primitive.NewObjectID()})
+
+	monId, _ := primitive.ObjectIDFromHex("61c32a0a61d12a5f03b73fc7")
+
+	conn.ProductCollection.InsertOne(context.TODO(), &models.Product{
+		Ingredients:    []string{""},
+		Images:         []string{""},
+		Id:             monId,
+		Quantity:       10,
+		Description:    "TEST",
+		Price:          "12.20",
+		Category:       "facewash",
+		TimesPurchased: 0,
+		Name:           "test",
+	})
+
+	tests := []struct {
+		description string
+
+		// Test input
+		route string
+
+		// Expected output
+		expectedError bool
+		expectedCode  int
+		expectedBody  bool
+		evaluator     string
+		query         string
+		queryValue    string
+		body          []byte
+		name          []byte
+	}{
+		{
+			description:   "logged in - update ingredients successfully",
+			route:         "/iriguchi/items/ingredients/61c32a0a61d12a5f03b73fc7",
+			expectedError: false,
+			expectedCode:  200,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"ingredients": ["hello"]}`),
+		},
+		{
+			description:   "logged in - fail to ingredients",
+			route:         "/iriguchi/items/ingredients/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"ingredients": []}`),
+		},
+		{
+			description:   "logged in - invalid id ingredients",
+			route:         "/iriguchi/items/ingredients/dl",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"ingredients": []}`),
+		},
+		{
+			description:   "logged in - invalid json ingredients",
+			route:         "/iriguchi/items/ingredients/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"ingredients" []}`),
+		},
+	}
+
+	// Setup the app as it is done in the main function
+	app := router.Setup()
+
+	// Iterate through test single test cases
+	for _, test := range tests {
+		// Create a new http request with the route
+		// from the test case
+		req, _ := http.NewRequest(
+			"PUT",
+			test.route,
+			bytes.NewBuffer(test.name),
+		)
+
+		if strings.Contains(test.description, "logged in") {
+			re, _ := http.NewRequest(
+				"POST",
+				"/iriguchi/auth/login",
+				bytes.NewBuffer(test.body),
+			)
+
+			re.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+			myR, _ := app.Test(re, -1)
+
+			c := myR.Cookies()
+
+			myc := c[0]
+
+			req.AddCookie(myc)
+		}
+
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		// Perform the request plain with the app.
+		// The -1 disables request latency.
+		res, err := app.Test(req, -1)
+
+		// verify that no error occured, that is not expected
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		// As expected errors lead to broken responses, the next
+		// test case needs to be processed
+		if test.expectedError {
+			continue
+		}
+
+		// Verify if the status code is as expected
+		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+
+		// Read the response body
+		body, err := ioutil.ReadAll(res.Body)
+
+		// Reading the response body should work everytime, such that
+		// the err variable should be nil
+		assert.Nilf(t, err, test.description)
+
+		// Verify, that the response body equals the expected body
+		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
+	}
+}
+
+func TestProductHandler_UpdateCategory(t *testing.T) {
+	p, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("could not connect to docker: %s", err)
+	}
+
+	pool = p
+
+	opts := dockertest.RunOptions{
+		Repository:   "mongo",
+		Tag:          "latest",
+		ExposedPorts: []string{"27017"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"27017": {
+				{HostIP: "0.0.0.0", HostPort: "27017"},
+			},
+		},
+	}
+
+	resource, err = pool.RunWithOptions(&opts)
+	if err != nil {
+		_ = pool.Purge(resource)
+		log.Fatalf("could not start resource: %s", err)
+	}
+
+	os.Setenv("DB_URL", "mongodb://localhost:27017")
+	os.Setenv("SECRET", "test")
+	os.Setenv("EXPIRATION", "120000")
+
+	defer func(pool *dockertest.Pool, r *dockertest.Resource) {
+		err := pool.Purge(r)
+		if err != nil {
+
+		}
+	}(pool, resource)
+
+	conn := database.ConnectToDB()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+
+	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "hdoe@gmail.com", Username: "hdoe", Password: string(hashedPassword),
+		Id: primitive.NewObjectID()})
+
+	monId, _ := primitive.ObjectIDFromHex("61c32a0a61d12a5f03b73fc7")
+
+	conn.ProductCollection.InsertOne(context.TODO(), &models.Product{
+		Ingredients:    []string{""},
+		Images:         []string{""},
+		Id:             monId,
+		Quantity:       10,
+		Description:    "TEST",
+		Price:          "12.20",
+		Category:       "facewash",
+		TimesPurchased: 0,
+		Name:           "test",
+	})
+
+	tests := []struct {
+		description string
+
+		// Test input
+		route string
+
+		// Expected output
+		expectedError bool
+		expectedCode  int
+		expectedBody  bool
+		evaluator     string
+		query         string
+		queryValue    string
+		body          []byte
+		name          []byte
+	}{
+		{
+			description:   "logged in - update category successfully",
+			route:         "/iriguchi/items/category/61c32a0a61d12a5f03b73fc7",
+			expectedError: false,
+			expectedCode:  200,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"category": "new"}`),
+		},
+		{
+			description:   "logged in - fail to category",
+			route:         "/iriguchi/items/category/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"category": "ld"}`),
+		},
+		{
+			description:   "logged in - validation error category",
+			route:         "/iriguchi/items/category/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  400,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"category": ""}`),
+		},
+		{
+			description:   "logged in - invalid id category",
+			route:         "/iriguchi/items/category/dl",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"category": "new"}`),
+		},
+		{
+			description:   "logged in - invalid json category",
+			route:         "/iriguchi/items/category/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+			name:          []byte(`{"category": ld}`),
+		},
+	}
+
+	// Setup the app as it is done in the main function
+	app := router.Setup()
+
+	// Iterate through test single test cases
+	for _, test := range tests {
+		// Create a new http request with the route
+		// from the test case
+		req, _ := http.NewRequest(
+			"PUT",
+			test.route,
+			bytes.NewBuffer(test.name),
+		)
+
+		if strings.Contains(test.description, "logged in") {
+			re, _ := http.NewRequest(
+				"POST",
+				"/iriguchi/auth/login",
+				bytes.NewBuffer(test.body),
+			)
+
+			re.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+			myR, _ := app.Test(re, -1)
+
+			c := myR.Cookies()
+
+			myc := c[0]
+
+			req.AddCookie(myc)
+		}
+
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		// Perform the request plain with the app.
+		// The -1 disables request latency.
+		res, err := app.Test(req, -1)
+
+		// verify that no error occured, that is not expected
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		// As expected errors lead to broken responses, the next
+		// test case needs to be processed
+		if test.expectedError {
+			continue
+		}
+
+		// Verify if the status code is as expected
+		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+
+		// Read the response body
+		body, err := ioutil.ReadAll(res.Body)
+
+		// Reading the response body should work everytime, such that
+		// the err variable should be nil
+		assert.Nilf(t, err, test.description)
+
+		// Verify, that the response body equals the expected body
+		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
+	}
+}
+
+func TestProductHandler_DeleteById(t *testing.T) {
+	p, err := dockertest.NewPool("")
+	if err != nil {
+		log.Fatalf("could not connect to docker: %s", err)
+	}
+
+	pool = p
+
+	opts := dockertest.RunOptions{
+		Repository:   "mongo",
+		Tag:          "latest",
+		ExposedPorts: []string{"27017"},
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"27017": {
+				{HostIP: "0.0.0.0", HostPort: "27017"},
+			},
+		},
+	}
+
+	resource, err = pool.RunWithOptions(&opts)
+	if err != nil {
+		_ = pool.Purge(resource)
+		log.Fatalf("could not start resource: %s", err)
+	}
+
+	os.Setenv("DB_URL", "mongodb://localhost:27017")
+	os.Setenv("SECRET", "test")
+	os.Setenv("EXPIRATION", "120000")
+
+	defer func(pool *dockertest.Pool, r *dockertest.Resource) {
+		err := pool.Purge(r)
+		if err != nil {
+
+		}
+	}(pool, resource)
+
+	conn := database.ConnectToDB()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+
+	conn.AdminCollection.InsertOne(context.TODO(), &models.User{Email: "hdoe@gmail.com", Username: "hdoe", Password: string(hashedPassword),
+		Id: primitive.NewObjectID()})
+
+	monId, _ := primitive.ObjectIDFromHex("61c32a0a61d12a5f03b73fc7")
+
+	conn.ProductCollection.InsertOne(context.TODO(), &models.Product{
+		Ingredients:    []string{""},
+		Images:         []string{""},
+		Id:             monId,
+		Quantity:       10,
+		Description:    "TEST",
+		Price:          "12.20",
+		Category:       "facewash",
+		TimesPurchased: 0,
+		Name:           "test",
+	})
+
+	tests := []struct {
+		description string
+
+		// Test input
+		route string
+
+		// Expected output
+		expectedError bool
+		expectedCode  int
+		expectedBody  bool
+		evaluator     string
+		query         string
+		queryValue    string
+		body          []byte
+	}{
+		{
+			description:   "logged in - delete product successfully",
+			route:         "/iriguchi/items/delete/61c32a0a61d12a5f03b73fc7",
+			expectedError: false,
+			expectedCode:  204,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+		},
+		{
+			description:   "logged in - fail to delete",
+			route:         "/iriguchi/items/delete/61c32a0a61d12a5f03b73fc8",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+		},
+
+		{
+			description:   "logged in - invalid id delete",
+			route:         "/iriguchi/items/delete/dl",
+			expectedError: false,
+			expectedCode:  500,
+			expectedBody:  true,
+			evaluator:     "",
+			query:         "",
+			queryValue:    "",
+			body:          []byte(`{"email": "hdoe@gmail.com", "password": "password"}`),
+		},
+	}
+
+	// Setup the app as it is done in the main function
+	app := router.Setup()
+
+	// Iterate through test single test cases
+	for _, test := range tests {
+		// Create a new http request with the route
+		// from the test case
+		req, _ := http.NewRequest(
+			"DELETE",
+			test.route,
+			nil,
+		)
+
+		if strings.Contains(test.description, "logged in") {
+			re, _ := http.NewRequest(
+				"POST",
+				"/iriguchi/auth/login",
+				bytes.NewBuffer(test.body),
+			)
+
+			re.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+			myR, _ := app.Test(re, -1)
+
+			c := myR.Cookies()
+
+			myc := c[0]
+
+			req.AddCookie(myc)
+		}
+
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		// Perform the request plain with the app.
+		// The -1 disables request latency.
+		res, err := app.Test(req, -1)
+
+		// verify that no error occured, that is not expected
+		assert.Equalf(t, test.expectedError, err != nil, test.description)
+
+		// As expected errors lead to broken responses, the next
+		// test case needs to be processed
+		if test.expectedError {
+			continue
+		}
+
+		// Verify if the status code is as expected
+		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+
+		// Read the response body
+		body, err := ioutil.ReadAll(res.Body)
+
+		// Reading the response body should work everytime, such that
+		// the err variable should be nil
+		assert.Nilf(t, err, test.description)
+
+		// Verify, that the response body equals the expected body
+		assert.Equalf(t, test.expectedBody, strings.Contains(string(body), test.evaluator), test.description)
+	}
+}
