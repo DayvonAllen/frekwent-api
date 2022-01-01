@@ -9,6 +9,7 @@ import (
 	"freq/helper"
 	"freq/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
@@ -37,6 +38,17 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 			if err != nil {
 				return fmt.Errorf("error processing data")
 			}
+
+			go func(conn *database.Connection) {
+				err = MailMemberRepoImpl{}.Create(&models.MailMember{
+					Id:              primitive.NewObjectID(),
+					MemberFirstName: customer.FirstName,
+					MemberLastName:  customer.LastName,
+					MemberEmail:     customer.Email,
+					CreatedAt:       time.Now(),
+					UpdatedAt:       time.Now(),
+				})
+			}(conn)
 
 			return nil
 		}

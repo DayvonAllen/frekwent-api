@@ -10,13 +10,14 @@ import (
 
 type Connection struct {
 	*mongo.Client
-	ProductCollection  *mongo.Collection
-	AdminCollection    *mongo.Collection
-	EmailCollection    *mongo.Collection
-	CouponCollection   *mongo.Collection
-	LoginIPCollection  *mongo.Collection
-	CustomerCollection *mongo.Collection
-	PurchaseCollection *mongo.Collection
+	ProductCollection    *mongo.Collection
+	AdminCollection      *mongo.Collection
+	EmailCollection      *mongo.Collection
+	CouponCollection     *mongo.Collection
+	LoginIPCollection    *mongo.Collection
+	CustomerCollection   *mongo.Collection
+	PurchaseCollection   *mongo.Collection
+	MailMemberCollection *mongo.Collection
 	*mongo.Database
 }
 
@@ -42,6 +43,7 @@ func ConnectToDB() *Connection {
 	loginIPCollection := db.Collection("loginIPs")
 	customerCollection := db.Collection("customers")
 	purchaseCollection := db.Collection("purchase")
+	memberMailCollection := db.Collection("memberMail")
 
 	dbConnection := &Connection{
 		client,
@@ -52,6 +54,7 @@ func ConnectToDB() *Connection {
 		loginIPCollection,
 		customerCollection,
 		purchaseCollection,
+		memberMailCollection,
 		db,
 	}
 

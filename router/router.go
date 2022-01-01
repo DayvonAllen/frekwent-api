@@ -19,6 +19,7 @@ func SetupRoutes(app *fiber.App) {
 	ph := handlers.PurchaseHandler{PurchaseService: services.NewPurchaseService(repository.NewPurchaseRepoImpl())}
 	prh := handlers.ProductHandler{ProductService: services.NewProductService(repository.NewProductRepoImpl())}
 	eh := handlers.EmailHandler{EmailService: services.NewEmailService(repository.NewEmailRepoImpl())}
+	mmh := handlers.MailMemberHandler{MailMemberService: services.NewMailMemberService(repository.NewMailMemberRepoImpl())}
 
 	app.Use(recover.New())
 
@@ -27,6 +28,9 @@ func SetupRoutes(app *fiber.App) {
 	auth := api.Group("/iriguchi/auth")
 	auth.Post("/login", ah.Login)
 	auth.Get("/logout", middleware.IsLoggedIn, ah.Logout)
+
+	subscribe := api.Group("/subscribe")
+	subscribe.Post("/subscribe", mmh.Create)
 
 	product := api.Group("/products")
 	product.Post("/buy", ph.Purchase)
@@ -61,6 +65,8 @@ func SetupRoutes(app *fiber.App) {
 	email := api.Group("/iriguchi/email")
 	email.Get("/get/:email", middleware.IsLoggedIn, eh.FindAllByEmail)
 	email.Get("/status/:status", middleware.IsLoggedIn, eh.FindAllByStatus)
+	email.Get("/members", middleware.IsLoggedIn, mmh.FindAll)
+	email.Delete("/members/:id", middleware.IsLoggedIn, mmh.DeleteById)
 	email.Get("", middleware.IsLoggedIn, eh.FindAll)
 
 	coupon := api.Group("/iriguchi/coupon")

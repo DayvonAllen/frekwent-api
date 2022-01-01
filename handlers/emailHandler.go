@@ -78,7 +78,7 @@ func (eh *EmailHandler) FindAllByStatus(c *fiber.Ctx) error {
 	} else {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("must provide a valid status")})
 	}
-	
+
 	emails, err := eh.EmailService.FindAllByStatus(page, isNew, &statusQuery)
 
 	if err != nil {
@@ -154,12 +154,12 @@ func (eh *EmailHandler) MassCouponEmail(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": "Invalid coupon code"})
 	}
 
-	optedInCustomers, err := repository.CustomerRepoImpl{}.FindAllByOptInStatus(true)
+	optedInMembers, err := repository.MailMemberRepoImpl{}.FindAll()
 
-	emails := make([]string, 0, len(*optedInCustomers))
-	for _, cus := range *optedInCustomers {
+	emails := make([]string, 0, len(*optedInMembers))
+	for _, cus := range *optedInMembers {
 
-		emails = append(emails, cus.Email)
+		emails = append(emails, cus.MemberEmail)
 	}
 
 	err = eh.EmailService.SendMassEmail(&emails, email.CouponCode)
