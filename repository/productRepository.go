@@ -2,21 +2,21 @@ package repository
 
 import (
 	"freq/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type ProductRepo interface {
 	Create(product *models.Product) error
 	FindAll(string, bool, bool) (*models.ProductList, error)
-	FindByProductId(primitive.ObjectID) (*models.Product, error)
+	FindByProductId(bson2.ObjectId) (*models.Product, error)
 	FindByProductName(string) (*models.Product, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
 	UpdatePurchaseCount(string) error
-	UpdateName(string, primitive.ObjectID) (*models.Product, error)
-	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
-	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)
-	UpdateDescription(string, primitive.ObjectID) (*models.Product, error)
-	UpdateIngredients(*[]string, primitive.ObjectID) (*models.Product, error)
-	UpdateCategory(string, primitive.ObjectID) (*models.Product, error)
-	DeleteById(primitive.ObjectID) error
+	UpdateName(string, bson2.ObjectId) (*models.Product, error)
+	UpdateQuantity(uint16, bson2.ObjectId) (*models.Product, error)
+	UpdatePrice(string, bson2.ObjectId) (*models.Product, error)
+	UpdateDescription(string, bson2.ObjectId) (*models.Product, error)
+	UpdateIngredients(*[]string, bson2.ObjectId) (*models.Product, error)
+	UpdateCategory(string, bson2.ObjectId) (*models.Product, error)
+	DeleteById(bson2.ObjectId) error
 }

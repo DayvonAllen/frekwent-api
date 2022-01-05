@@ -9,7 +9,6 @@ import (
 	"freq/models"
 	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"strconv"
 	"strings"
@@ -165,7 +164,7 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 	return &p.transaction, nil
 }
 
-func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
+func (p PurchaseRepoImpl) FindByPurchaseById(id bson2.ObjectId) (*models.Purchase, error) {
 	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.PURCHASES).FindId(id).One(&p.purchase)

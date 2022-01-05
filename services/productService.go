@@ -3,22 +3,22 @@ package services
 import (
 	"freq/models"
 	"freq/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type ProductService interface {
 	Create(product *models.Product) error
 	FindAll(string, bool, bool) (*models.ProductList, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
-	FindByProductId(primitive.ObjectID) (*models.Product, error)
+	FindByProductId(bson2.ObjectId) (*models.Product, error)
 	FindByProductName(string) (*models.Product, error)
-	UpdateName(string, primitive.ObjectID) (*models.Product, error)
-	UpdateQuantity(uint16, primitive.ObjectID) (*models.Product, error)
-	UpdatePrice(string, primitive.ObjectID) (*models.Product, error)
-	UpdateDescription(string, primitive.ObjectID) (*models.Product, error)
-	UpdateIngredients(*[]string, primitive.ObjectID) (*models.Product, error)
-	UpdateCategory(string, primitive.ObjectID) (*models.Product, error)
-	DeleteById(primitive.ObjectID) error
+	UpdateName(string, bson2.ObjectId) (*models.Product, error)
+	UpdateQuantity(uint16, bson2.ObjectId) (*models.Product, error)
+	UpdatePrice(string, bson2.ObjectId) (*models.Product, error)
+	UpdateDescription(string, bson2.ObjectId) (*models.Product, error)
+	UpdateIngredients(*[]string, bson2.ObjectId) (*models.Product, error)
+	UpdateCategory(string, bson2.ObjectId) (*models.Product, error)
+	DeleteById(bson2.ObjectId) error
 }
 
 type DefaultProductService struct {
@@ -55,7 +55,7 @@ func (p DefaultProductService) FindAllByCategory(category string, page string, n
 	return products, nil
 }
 
-func (p DefaultProductService) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) FindByProductId(id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.FindByProductId(id)
 
 	if err != nil {
@@ -75,7 +75,7 @@ func (p DefaultProductService) FindByProductName(name string) (*models.Product, 
 	return product, nil
 }
 
-func (p DefaultProductService) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdateName(name string, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdateName(name, id)
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (p DefaultProductService) UpdateName(name string, id primitive.ObjectID) (*
 	return product, nil
 }
 
-func (p DefaultProductService) UpdateQuantity(quan uint16, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdateQuantity(quan uint16, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdateQuantity(quan, id)
 
 	if err != nil {
@@ -95,7 +95,7 @@ func (p DefaultProductService) UpdateQuantity(quan uint16, id primitive.ObjectID
 	return product, nil
 }
 
-func (p DefaultProductService) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdatePrice(price string, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdatePrice(price, id)
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (p DefaultProductService) UpdatePrice(price string, id primitive.ObjectID) 
 	return product, nil
 }
 
-func (p DefaultProductService) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdateDescription(desc string, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdateDescription(desc, id)
 
 	if err != nil {
@@ -115,7 +115,7 @@ func (p DefaultProductService) UpdateDescription(desc string, id primitive.Objec
 	return product, nil
 }
 
-func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdateIngredients(ingredients, id)
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (p DefaultProductService) UpdateIngredients(ingredients *[]string, id primi
 
 	return product, nil
 }
-func (p DefaultProductService) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
+func (p DefaultProductService) UpdateCategory(category string, id bson2.ObjectId) (*models.Product, error) {
 	product, err := p.repo.UpdateCategory(category, id)
 
 	if err != nil {
@@ -134,7 +134,7 @@ func (p DefaultProductService) UpdateCategory(category string, id primitive.Obje
 	return product, nil
 }
 
-func (p DefaultProductService) DeleteById(id primitive.ObjectID) error {
+func (p DefaultProductService) DeleteById(id bson2.ObjectId) error {
 	err := p.repo.DeleteById(id)
 
 	if err != nil {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"freq/database"
 	"freq/models"
+	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -18,6 +18,8 @@ type MailMemberRepoImpl struct {
 func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
 	conn := database.Sess
 
+	fmt.Println(mm)
+
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(bson.M{"memberEmail": mm.MemberEmail}).One(&m.mailMember)
 
 	if err != nil {
@@ -26,7 +28,7 @@ func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
 			mm.CreatedAt = time.Now()
 			mm.UpdatedAt = time.Now()
 
-			err = conn.DB(database.DB).C(database.MAIL_MEMBERS).Insert(&mm)
+			err = conn.DB(database.DB).C(database.MAIL_MEMBERS).Insert(mm)
 
 			if err != nil {
 				return fmt.Errorf("error processing data")
@@ -52,7 +54,7 @@ func (m MailMemberRepoImpl) FindAll() (*[]models.MailMember, error) {
 	return &m.mailMembers, nil
 }
 
-func (m MailMemberRepoImpl) DeleteById(id primitive.ObjectID) error {
+func (m MailMemberRepoImpl) DeleteById(id bson2.ObjectId) error {
 	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).RemoveId(id)

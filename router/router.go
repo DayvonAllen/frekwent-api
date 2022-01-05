@@ -36,7 +36,7 @@ func SetupRoutes(app *fiber.App) {
 	auth.Post("/login", ah.Login)
 	auth.Get("/logout", middleware.IsLoggedIn, ah.Logout)
 
-	subscribe := api.Group("/subscribe")
+	subscribe := api.Group("/email")
 	subscribe.Post("/subscribe", mmh.Create)
 
 	product := api.Group("/products")

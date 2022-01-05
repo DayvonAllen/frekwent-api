@@ -2,11 +2,11 @@ package repository
 
 import (
 	"freq/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type MailMemberRepo interface {
 	Create(mailMember *models.MailMember) error
 	FindAll() (*[]models.MailMember, error)
-	DeleteById(id primitive.ObjectID) error
+	DeleteById(id bson2.ObjectId) error
 }

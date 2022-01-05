@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"freq/models"
 	"freq/services"
+	bson2 "github.com/globalsign/mgo/bson"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MailMemberHandler struct {
@@ -43,13 +43,9 @@ func (mh *MailMemberHandler) FindAll(c *fiber.Ctx) error {
 func (mh *MailMemberHandler) DeleteById(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
+	monId := bson2.ObjectIdHex(id)
 
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
-
-	err = mh.MailMemberService.DeleteById(monId)
+	err := mh.MailMemberService.DeleteById(monId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})

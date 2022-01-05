@@ -293,7 +293,7 @@ func (c CustomerRepoImpl) FindByEmail(email string) (*models.Customer, error) {
 func (c CustomerRepoImpl) FindAllByOptInStatus(optIn bool) (*[]models.Customer, error) {
 	conn := database.Sess
 
-	err := conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"infoEmailOptIn": optIn}).One(&c.customer)
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"infoEmailOptIn": optIn}).All(&c.customers)
 
 	if err != nil {
 		return nil, err

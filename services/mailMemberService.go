@@ -3,13 +3,13 @@ package services
 import (
 	"freq/models"
 	"freq/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type MailMemberService interface {
 	Create(mm *models.MailMember) error
 	FindAll() (*[]models.MailMember, error)
-	DeleteById(id primitive.ObjectID) error
+	DeleteById(id bson2.ObjectId) error
 }
 
 type DefaultMailMemberService struct {
@@ -36,7 +36,7 @@ func (m DefaultMailMemberService) FindAll() (*[]models.MailMember, error) {
 	return members, nil
 }
 
-func (m DefaultMailMemberService) DeleteById(id primitive.ObjectID) error {
+func (m DefaultMailMemberService) DeleteById(id bson2.ObjectId) error {
 	err := m.repo.DeleteById(id)
 
 	if err != nil {

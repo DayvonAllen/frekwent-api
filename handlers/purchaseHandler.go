@@ -40,11 +40,7 @@ func (ph *PurchaseHandler) FindByPurchaseById(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	foundPurchase, err := ph.PurchaseService.FindByPurchaseById(monId)
 

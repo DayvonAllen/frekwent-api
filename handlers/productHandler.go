@@ -6,8 +6,8 @@ import (
 	"freq/helper"
 	"freq/models"
 	"freq/services"
+	bson2 "github.com/globalsign/mgo/bson"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
 	"strings"
 )
@@ -108,11 +108,7 @@ func (ph *ProductHandler) FindAllByCategory(c *fiber.Ctx) error {
 func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	product, err := ph.ProductService.FindByProductId(monId)
 
@@ -152,11 +148,7 @@ func (ph *ProductHandler) UpdateName(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	updatedProduct, err := ph.ProductService.UpdateName(product.Name, monId)
 
@@ -178,11 +170,7 @@ func (ph *ProductHandler) UpdatePrice(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	if !helper.IsValidPrice(product.Price) {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", errors.New("invalid price"))})
@@ -214,11 +202,7 @@ func (ph *ProductHandler) UpdateDescription(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	updatedProduct, err := ph.ProductService.UpdateDescription(product.Description, monId)
 
@@ -240,11 +224,7 @@ func (ph *ProductHandler) UpdateQuantity(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	updatedProduct, err := ph.ProductService.UpdateQuantity(product.Quantity, monId)
 
@@ -266,11 +246,7 @@ func (ph *ProductHandler) UpdateIngredients(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	updatedProduct, err := ph.ProductService.UpdateIngredients(product.Ingredients, monId)
 
@@ -298,11 +274,7 @@ func (ph *ProductHandler) UpdateCategory(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
+	monId := bson2.ObjectIdHex(id)
 
 	updatedProduct, err := ph.ProductService.UpdateCategory(strings.ToLower(product.Category), monId)
 
@@ -316,13 +288,9 @@ func (ph *ProductHandler) UpdateCategory(c *fiber.Ctx) error {
 func (ph *ProductHandler) DeleteById(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	monId, err := primitive.ObjectIDFromHex(id)
+	monId := bson2.ObjectIdHex(id)
 
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
-	}
-
-	err = ph.ProductService.DeleteById(monId)
+	err := ph.ProductService.DeleteById(monId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"freq/database"
 	"freq/models"
+	"github.com/globalsign/mgo"
 	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"time"
@@ -135,7 +135,7 @@ func (p ProductRepoImpl) FindAllByCategory(category string, page string, newProd
 	return &p.productList, nil
 }
 
-func (p ProductRepoImpl) FindByProductId(id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) FindByProductId(id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).FindId(id).One(&p.product)
@@ -167,7 +167,7 @@ func (p ProductRepoImpl) FindByProductName(name string) (*models.Product, error)
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdateName(name string, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	prod := new(models.Product)
@@ -196,7 +196,7 @@ func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models
 	return nil, errors.New("product with that name already exists")
 }
 
-func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	update := bson.M{"quantity": quantity,
@@ -216,9 +216,12 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) 
 func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 	conn := database.Sess
 
-	update := bson.M{"$inc": bson.M{"timesPurchased": 1}}
+	update :=
+		mgo.Change{
+			Update: bson.M{"$inc": bson.M{"timesPurchased": 1}},
+		}
 
-	err := conn.DB(database.DB).C(database.PRODUCTS).Update(bson.D{{"name", name}}, update)
+	_, err := conn.DB(database.DB).C(database.PRODUCTS).Find(bson.M{"name": name}).Apply(update, &p.product)
 
 	if err != nil {
 		return err
@@ -227,7 +230,7 @@ func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 	return nil
 }
 
-func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdatePrice(price string, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	update := bson.M{"price": price,
@@ -244,7 +247,7 @@ func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*mode
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdateDescription(desc string, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	update := bson.M{"description": desc,
@@ -261,7 +264,7 @@ func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	update := bson.M{"ingredients": ingredients,
@@ -278,7 +281,7 @@ func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.O
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
+func (p ProductRepoImpl) UpdateCategory(category string, id bson2.ObjectId) (*models.Product, error) {
 	conn := database.Sess
 
 	update := bson.M{"category": category,
@@ -295,7 +298,7 @@ func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) 
 	return &p.product, nil
 }
 
-func (p ProductRepoImpl) DeleteById(id primitive.ObjectID) error {
+func (p ProductRepoImpl) DeleteById(id bson2.ObjectId) error {
 	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).RemoveId(id)

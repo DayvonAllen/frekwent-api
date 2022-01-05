@@ -3,13 +3,13 @@ package services
 import (
 	"freq/models"
 	"freq/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type PurchaseService interface {
 	Purchase(purchase *models.Purchase) error
 	FindAll(string, bool) (*models.PurchaseList, error)
-	FindByPurchaseById(primitive.ObjectID) (*models.Purchase, error)
+	FindByPurchaseById(bson2.ObjectId) (*models.Purchase, error)
 	FindByPurchaseConfirmationId(string) (*models.Purchase, error)
 	CalculateTransactionsByState(string) (*models.Transactions, error)
 	UpdateShippedStatus(*models.PurchaseShippedDTO) error
@@ -42,7 +42,7 @@ func (p DefaultPurchaseService) FindAll(page string, newQuery bool) (*models.Pur
 	return purchases, nil
 }
 
-func (p DefaultPurchaseService) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
+func (p DefaultPurchaseService) FindByPurchaseById(id bson2.ObjectId) (*models.Purchase, error) {
 	purchase, err := p.repo.FindByPurchaseById(id)
 
 	if err != nil {
