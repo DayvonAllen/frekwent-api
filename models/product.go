@@ -23,6 +23,10 @@ type ProductNameDto struct {
 	Name string `bson:"name" json:"name"`
 }
 
+type ProductIdDto struct {
+	Ids []bson.ObjectId `json:"ids"`
+}
+
 type ProductPriceDto struct {
 	Price string `bson:"price" json:"price"`
 }

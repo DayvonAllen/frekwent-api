@@ -119,6 +119,23 @@ func (ph *ProductHandler) FindByProductId(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": product})
 }
 
+func (ph *ProductHandler) FindAllByProductIds(c *fiber.Ctx) error {
+	product := new(models.ProductIdDto)
+	err := c.BodyParser(product)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	products, err := ph.ProductService.FindAllByProductIds(&product.Ids)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "success", "message": "success", "data": products})
+}
+
 func (ph *ProductHandler) FindByProductName(c *fiber.Ctx) error {
 	name := c.Query("name")
 

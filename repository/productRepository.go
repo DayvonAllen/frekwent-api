@@ -10,6 +10,7 @@ type ProductRepo interface {
 	FindAll(string, bool, bool) (*models.ProductList, error)
 	FindByProductId(bson2.ObjectId) (*models.Product, error)
 	FindByProductName(string) (*models.Product, error)
+	FindAllByProductIds(*[]bson2.ObjectId) (*[]models.Product, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
 	UpdatePurchaseCount(string) error
 	UpdateName(string, bson2.ObjectId) (*models.Product, error)

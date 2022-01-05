@@ -41,6 +41,7 @@ func SetupRoutes(app *fiber.App) {
 
 	product := api.Group("/products")
 	product.Post("/buy", ph.Purchase)
+	product.Post("/ids", prh.FindAllByProductIds)
 	product.Get("/:id", prh.FindByProductId)
 	product.Get("/category/:category", prh.FindAllByCategory)
 	product.Get("", prh.FindAll)

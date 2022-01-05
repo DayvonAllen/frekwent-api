@@ -91,6 +91,21 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool, trending boo
 	return &p.productList, nil
 }
 
+func (p ProductRepoImpl) FindAllByProductIds(ids *[]bson2.ObjectId) (*[]models.Product, error) {
+	conn := database.Sess
+
+	for _, id := range *ids {
+		err := conn.DB(database.DB).C(database.PRODUCTS).Find(bson.M{"_id": id}).One(&p.product)
+		if err != nil {
+			return nil, errors.New("not found")
+		}
+
+		p.products = append(p.products, p.product)
+	}
+
+	return &p.products, nil
+}
+
 func (p ProductRepoImpl) FindAllByCategory(category string, page string, newProductQuery bool) (*models.ProductList, error) {
 	conn := database.Sess
 

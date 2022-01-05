@@ -10,6 +10,7 @@ type ProductService interface {
 	Create(product *models.Product) error
 	FindAll(string, bool, bool) (*models.ProductList, error)
 	FindAllByCategory(string, string, bool) (*models.ProductList, error)
+	FindAllByProductIds(*[]bson2.ObjectId) (*[]models.Product, error)
 	FindByProductId(bson2.ObjectId) (*models.Product, error)
 	FindByProductName(string) (*models.Product, error)
 	UpdateName(string, bson2.ObjectId) (*models.Product, error)
@@ -37,6 +38,16 @@ func (p DefaultProductService) Create(product *models.Product) error {
 
 func (p DefaultProductService) FindAll(page string, newQuery bool, trending bool) (*models.ProductList, error) {
 	products, err := p.repo.FindAll(page, newQuery, trending)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (p DefaultProductService) FindAllByProductIds(id *[]bson2.ObjectId) (*[]models.Product, error) {
+	products, err := p.repo.FindAllByProductIds(id)
 
 	if err != nil {
 		return nil, err
