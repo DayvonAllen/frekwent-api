@@ -18,8 +18,6 @@ type MailMemberRepoImpl struct {
 func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
 	conn := database.Sess
 
-	fmt.Println(mm)
-
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(bson.M{"memberEmail": mm.MemberEmail}).One(&m.mailMember)
 
 	if err != nil {
@@ -27,6 +25,7 @@ func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
 		if err.Error() == "not found" {
 			mm.CreatedAt = time.Now()
 			mm.UpdatedAt = time.Now()
+			mm.Id = bson2.NewObjectId()
 
 			err = conn.DB(database.DB).C(database.MAIL_MEMBERS).Insert(mm)
 
@@ -66,8 +65,8 @@ func (m MailMemberRepoImpl) DeleteById(id bson2.ObjectId) error {
 	return nil
 }
 
-func NewMailMemberRepoImpl() MailMemberRepo {
-	var mailMemberRepoImpl MailMemberRepo
+func NewMailMemberRepoImpl() MailMemberRepoImpl {
+	var mailMemberRepoImpl MailMemberRepoImpl
 
 	return mailMemberRepoImpl
 }

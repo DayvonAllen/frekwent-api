@@ -20,7 +20,7 @@ func (mh *MailMemberHandler) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
-
+	
 	err = mh.MailMemberService.Create(mailMember)
 
 	if err != nil {
