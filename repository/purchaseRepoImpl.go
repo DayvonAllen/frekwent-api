@@ -1,17 +1,15 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"freq/config"
 	"freq/database"
 	"freq/helper"
 	"freq/models"
+	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strconv"
 	"strings"
@@ -27,13 +25,13 @@ type PurchaseRepoImpl struct {
 }
 
 func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
 	purchase = helper.EncryptPI(purchase)
 
 	customer := new(models.Customer)
 
-	customer.Id = primitive.NewObjectID()
+	customer.Id = bson2.NewObjectId()
 	customer.UpdatedAt = time.Now()
 	customer.CreatedAt = time.Now()
 	customer.FirstName = purchase.FirstName
@@ -49,16 +47,23 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 
 	err := CustomerRepoImpl{}.Create(customer)
 
-	_, err = conn.PurchaseCollection.InsertOne(context.TODO(), purchase)
+	if err != nil {
+		return fmt.Errorf("error processing data")
+	}
+
+	purchase.CouponUsed.Id = bson2.NewObjectId()
+
+	err = conn.DB(database.DB).C(database.PURCHASES).Insert(purchase)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")
 	}
 
-	go func(connection *database.Connection) {
+	go func() {
 		emailAdd := config.Config("BUSINESS_EMAIL")
 
 		email := new(models.Email)
+		email.Id = bson2.NewObjectId()
 		email.CustomerEmail = customer.Email
 		email.From = emailAdd
 		email.Subject = "test subject"
@@ -73,25 +78,24 @@ func (p PurchaseRepoImpl) Purchase(purchase *models.Purchase) error {
 		}
 
 		go ProducerMessage(email)
-	}(conn)
+	}()
 
-	go func(connection *database.Connection) {
+	go func() {
 		repo := ProductRepoImpl{}
 		for _, product := range *purchase.PurchasedItems {
-			err := repo.UpdatePurchaseCount(product.Name)
+			err = repo.UpdatePurchaseCount(product.Name)
 			if err != nil {
 				return
 			}
 		}
-	}(conn)
+	}()
 
 	return nil
 }
 
 func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.PurchaseList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -99,36 +103,17 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newPurchaseQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.PurchaseCollection.Find(context.TODO(), bson.M{}, &findOptions)
+	err = conn.DB(database.DB).C(database.PURCHASES).Find(nil).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&p.purchases)
 
 	if err != nil {
 		return nil, errors.New("error finding purchases")
 	}
 
-	if err = cur.All(context.TODO(), &p.purchases); err != nil {
-		log.Println(errors.New("error finding purchases"))
-	}
-
-	if p.purchases == nil {
-		return nil, errors.New("no purchases in the database")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.DB(database.DB).C(database.PRODUCTS).Count()
 
 	if err != nil {
 		return nil, errors.New("error finding purchases")
@@ -149,7 +134,7 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 }
 
 func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Transactions, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
 	var filter bson.D
 
@@ -159,29 +144,13 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 		filter = bson.D{{"state", state}, {"refunded", false}}
 	}
 
-	cur, err := conn.PurchaseCollection.Find(context.TODO(), filter)
+	err := conn.DB(database.DB).C(database.PURCHASES).Find(filter).All(&p.purchases)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), &p.purchases); err != nil {
-		panic(err)
-	}
-
-	if p.purchases == nil {
-		return nil, errors.New("no transactions in the database")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.PurchaseCollection.CountDocuments(context.TODO(), filter)
+	count, err := conn.DB(database.DB).C(database.PRODUCTS).Count()
 
 	if err != nil {
 		panic(err)
@@ -197,13 +166,13 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Purchase, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	err := conn.PurchaseCollection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).FindId(id).One(&p.purchase)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
+		if err.Error() == "not found" {
 			return nil, errors.New(fmt.Sprintf("no purchase with the ID %v", id))
 		}
 		return nil, fmt.Errorf("error processing data")
@@ -215,13 +184,13 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id primitive.ObjectID) (*models.Pur
 }
 
 func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purchase, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	err := conn.PurchaseCollection.FindOne(context.TODO(), bson.D{{"purchaseConfirmationId", id}}).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).Find(bson.D{{"purchaseConfirmationId", id}}).One(&p.purchase)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
+		if err.Error() == "not found" {
 			return nil, errors.New(fmt.Sprintf("error finding purchases with purchase confirmation ID %v", id))
 		}
 		return nil, fmt.Errorf("error processing data")
@@ -233,15 +202,12 @@ func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purch
 }
 
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"shipped", dto.Shipped},
 		{"trackingId", dto.TrackingId}}}}
 
-	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
 	if err != nil {
 		return errors.New("error updating purchase's shipping status")
@@ -251,14 +217,11 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 }
 
 func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"delivered", dto.Delivered}}}}
 
-	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
 	if err != nil {
 		return errors.New("error updating purchase's delivered status")
@@ -268,7 +231,7 @@ func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO
 }
 
 func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
 	key := config.Config("KEY")
 
@@ -337,16 +300,13 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 
 	wg.Wait()
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"streetAddress", dto.StreetAddress},
 		{"optionalAddress", dto.OptionalAddress},
 		{"city", dto.City},
 		{"state", dto.State},
 		{"zipCode", dto.ZipCode}}}}
 
-	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
 	if err != nil {
 		return errors.New("error updating purchase's address")
@@ -356,14 +316,11 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 }
 
 func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"_id", dto.Id}}
 	update := bson.D{{"$set", bson.D{{"trackingId", dto.TrackingId}}}}
 
-	err := conn.PurchaseCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
 	if err != nil {
 		return errors.New("error updating purchase's tracking ID")

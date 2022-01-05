@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"freq/config"
 	"freq/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	mRand "math/rand"
 	"regexp"
@@ -131,7 +130,6 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 
 	go func() {
 		defer wg.Done()
-		purchase.Id = primitive.NewObjectID()
 		purchase.PurchaseConfirmationId = RandomString(32)
 		purchase.Shipped = false
 		purchase.Delivered = false
@@ -255,7 +253,6 @@ func DecryptPI(purchase *models.Purchase) *models.Purchase {
 func CreateEmail(email *models.Email, emailDto *models.EmailDto, emailType models.EmailType) *models.Email {
 	emailAdd := config.Config("BUSINESS_EMAIL")
 
-	email.Id = primitive.NewObjectID()
 	email.From = emailAdd
 	email.CustomerEmail = emailDto.Email
 	email.Content = emailDto.Content

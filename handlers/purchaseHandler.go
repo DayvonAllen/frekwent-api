@@ -5,6 +5,7 @@ import (
 	"freq/helper"
 	"freq/models"
 	"freq/services"
+	bson2 "github.com/globalsign/mgo/bson"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
@@ -93,8 +94,6 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "error...", "data": fmt.Sprintf("%v", err)})
 	}
 
-	purchase.Id = primitive.NewObjectID()
-
 	purchase.FirstName = strings.ToLower(purchase.FirstName)
 	purchase.LastName = strings.ToLower(purchase.LastName)
 	purchase.Email = strings.ToLower(purchase.Email)
@@ -102,6 +101,7 @@ func (ph *PurchaseHandler) Purchase(c *fiber.Ctx) error {
 	purchase.City = strings.ToLower(purchase.City)
 	purchase.StreetAddress = strings.ToLower(purchase.StreetAddress)
 	purchase.OptionalAddress = strings.ToLower(purchase.OptionalAddress)
+	purchase.Id = bson2.NewObjectId()
 
 	err = ph.PurchaseService.Purchase(purchase)
 

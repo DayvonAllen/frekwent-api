@@ -1,16 +1,13 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"freq/config"
 	"freq/database"
 	"freq/models"
+	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"time"
 )
@@ -22,13 +19,12 @@ type EmailRepoImpl struct {
 }
 
 func (e EmailRepoImpl) Create(email *models.Email) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess.Copy()
 
-	email.Id = primitive.NewObjectID()
 	email.CreatedAt = time.Now()
 	email.UpdatedAt = time.Now()
 
-	_, err := conn.EmailCollection.InsertOne(context.TODO(), email)
+	err := conn.DB(database.DB).C(database.EMAILS).Insert(&email)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")
@@ -38,12 +34,13 @@ func (e EmailRepoImpl) Create(email *models.Email) error {
 }
 
 func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
+
 	emailsArr := make([]interface{}, 0, len(*emails))
 
 	for _, em := range *emails {
 		emailsArr = append(emailsArr, models.Email{
-			Id:            primitive.NewObjectID(),
+			Id:            bson2.NewObjectId(),
 			CreatedAt:     time.Now(),
 			UpdatedAt:     time.Now(),
 			Content:       coupon,
@@ -55,7 +52,7 @@ func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 		})
 	}
 
-	_, err := conn.EmailCollection.InsertMany(context.TODO(), emailsArr)
+	err := conn.DB(database.DB).C(database.EMAILS).Insert(emailsArr)
 
 	if err != nil {
 		return fmt.Errorf("error processing data")
@@ -65,9 +62,8 @@ func (e EmailRepoImpl) SendMassEmail(emails *[]string, coupon string) error {
 }
 
 func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -75,36 +71,17 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newEmailQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.EmailCollection.Find(context.TODO(), bson.M{}, &findOptions)
+	err = conn.DB(database.DB).C(database.EMAILS).Find(nil).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&e.emails)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), &e.emails); err != nil {
-		panic(err)
-	}
-
-	if e.emails == nil {
-		return nil, errors.New("no emails in the database")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.DB(database.DB).C(database.EMAILS).Count()
 
 	if err != nil {
 		panic(err)
@@ -125,9 +102,8 @@ func (e EmailRepoImpl) FindAll(page string, newEmailQuery bool) (*models.EmailLi
 }
 
 func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email string) (*models.EmailList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -135,36 +111,17 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newEmailQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.EmailCollection.Find(context.TODO(), bson.D{{"customerEmail", email}}, &findOptions)
+	err = conn.DB(database.DB).C(database.EMAILS).Find(bson.M{"email": email}).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&e.emails)
 
 	if err != nil {
 		return nil, errors.New("error finding email")
 	}
 
-	if err = cur.All(context.TODO(), &e.emails); err != nil {
-		panic(err)
-	}
-
-	if e.emails == nil {
-		return nil, errors.New(fmt.Sprintf("No emails found for the email address: %s", email))
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.D{{"customerEmail", email}})
+	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.D{{"email", email}}).Count()
 
 	if err != nil {
 		panic(err)
@@ -185,9 +142,8 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 }
 
 func (e EmailRepoImpl) FindAllByStatus(page string, newEmailQuery bool, status *models.Status) (*models.EmailList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -195,36 +151,17 @@ func (e EmailRepoImpl) FindAllByStatus(page string, newEmailQuery bool, status *
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newEmailQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.EmailCollection.Find(context.TODO(), bson.D{{"status", status}}, &findOptions)
+	err = conn.DB(database.DB).C(database.EMAILS).Find(bson.M{"status": status}).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&e.emails)
 
 	if err != nil {
 		return nil, errors.New("error finding email")
 	}
 
-	if err = cur.All(context.TODO(), &e.emails); err != nil {
-		panic(err)
-	}
-
-	if e.emails == nil {
-		return nil, errors.New("no emails found with that status")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.EmailCollection.CountDocuments(context.TODO(), bson.D{{"status", status}})
+	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.D{{"status", status}}).Count()
 
 	if err != nil {
 		panic(err)
@@ -244,15 +181,14 @@ func (e EmailRepoImpl) FindAllByStatus(page string, newEmailQuery bool, status *
 	return &e.emailList, nil
 }
 
-func (e EmailRepoImpl) UpdateEmailStatus(id primitive.ObjectID, status models.Status) error {
-	conn := database.ConnectToDB()
+func (e EmailRepoImpl) UpdateEmailStatus(id bson2.ObjectId, status models.Status) error {
+	conn := database.Sess
 
-	_, err := conn.EmailCollection.UpdateByID(context.TODO(), id, bson.D{{"$set",
-		bson.D{{"updatedAt", time.Now()}, {"status", status}}}})
+	err := conn.DB(database.DB).C(database.EMAILS).UpdateId(id, bson.M{"$set": bson.D{{"updatedAt", time.Now()}, {"status", status}}})
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
+		if err.Error() == "not found" {
 			return err
 		}
 		return fmt.Errorf("error processing data")

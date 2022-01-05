@@ -5,9 +5,11 @@ import (
 	"freq/middleware"
 	"freq/repository"
 	"freq/services"
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
@@ -21,7 +23,12 @@ func SetupRoutes(app *fiber.App) {
 	eh := handlers.EmailHandler{EmailService: services.NewEmailService(repository.NewEmailRepoImpl())}
 	mmh := handlers.MailMemberHandler{MailMemberService: services.NewMailMemberService(repository.NewMailMemberRepoImpl())}
 
+	prometheus := fiberprometheus.New("freq")
+	prometheus.RegisterAt(app, "/metrics")
+
+	app.Use(prometheus.Middleware)
 	app.Use(recover.New())
+	app.Use(pprof.New())
 
 	api := app.Group("", logger.New())
 

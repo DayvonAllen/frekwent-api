@@ -1,17 +1,14 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"freq/config"
 	"freq/database"
 	"freq/helper"
 	"freq/models"
+	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"sync"
 	"time"
@@ -24,31 +21,29 @@ type CustomerRepoImpl struct {
 }
 
 func (c CustomerRepoImpl) Create(customer *models.Customer) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	err := conn.CustomerCollection.FindOne(context.TODO(), bson.D{
-		{"email", customer.Email},
-	}).Decode(&c.customer)
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"email": customer.Email}).One(&c.customer)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
-			_, err = conn.CustomerCollection.InsertOne(context.TODO(), customer)
+		if err.Error() == "not found" {
+			err = conn.DB(database.DB).C(database.CUSTOMERS).Insert(customer)
 
 			if err != nil {
 				return fmt.Errorf("error processing data")
 			}
 
-			go func(conn *database.Connection) {
+			go func() {
 				err = MailMemberRepoImpl{}.Create(&models.MailMember{
-					Id:              primitive.NewObjectID(),
+					Id:              bson2.NewObjectId(),
 					MemberFirstName: customer.FirstName,
 					MemberLastName:  customer.LastName,
 					MemberEmail:     customer.Email,
 					CreatedAt:       time.Now(),
 					UpdatedAt:       time.Now(),
 				})
-			}(conn)
+			}()
 
 			return nil
 		}
@@ -59,9 +54,9 @@ func (c CustomerRepoImpl) Create(customer *models.Customer) error {
 }
 
 func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.CustomerList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
+	//findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -69,34 +64,15 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newCustomerQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.CustomerCollection.Find(context.TODO(), bson.M{}, &findOptions)
+	err = conn.DB(database.DB).C(database.CUSTOMERS).Find(nil).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&c.customers)
 
 	if err != nil {
 		return nil, err
 	}
-
-	if err = cur.All(context.TODO(), &c.customers); err != nil {
-		panic(err)
-	}
-
-	if c.customers == nil {
-		return nil, errors.New("no customers found")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
 
 	var wg sync.WaitGroup
 	key := config.Config("KEY")
@@ -168,7 +144,7 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 		decryptedCustomers = append(decryptedCustomers, customer)
 	}
 
-	count, err := conn.CustomerCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.DB(database.DB).C(database.CUSTOMERS).Count()
 
 	if err != nil {
 		panic(err)
@@ -189,9 +165,8 @@ func (c CustomerRepoImpl) FindAll(page string, newCustomerQuery bool) (*models.C
 }
 
 func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, page string, newLoginQuery bool) (*models.CustomerList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -199,35 +174,15 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newLoginQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.CustomerCollection.Find(context.TODO(), bson.D{{"firstName", firstName}, {"lastName",
-		lastName}}, &findOptions)
+	err = conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"firstName": firstName, "lastName": lastName}).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&c.customers)
 
 	if err != nil {
 		return nil, err
 	}
-
-	if err = cur.All(context.TODO(), &c.customers); err != nil {
-		panic(err)
-	}
-
-	if c.customers == nil {
-		return nil, errors.New(fmt.Sprintf("No customer found with the first name: %s and last name: %s", firstName, lastName))
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
 
 	var wg sync.WaitGroup
 	key := config.Config("KEY")
@@ -299,7 +254,7 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 		decryptedCustomers = append(decryptedCustomers, customer)
 	}
 
-	count, err := conn.CustomerCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.DB(database.DB).C(database.CUSTOMERS).Count()
 
 	if err != nil {
 		panic(err)
@@ -320,13 +275,13 @@ func (c CustomerRepoImpl) FindAllByFullName(firstName string, lastName string, p
 }
 
 func (c CustomerRepoImpl) FindByEmail(email string) (*models.Customer, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	err := conn.CustomerCollection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&c.customer)
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"email": email}).One(&c.customer)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
+		if err.Error() == "not found" {
 			return nil, err
 		}
 		return nil, fmt.Errorf("error processing data")
@@ -336,43 +291,22 @@ func (c CustomerRepoImpl) FindByEmail(email string) (*models.Customer, error) {
 }
 
 func (c CustomerRepoImpl) FindAllByOptInStatus(optIn bool) (*[]models.Customer, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	cur, err := conn.CustomerCollection.Find(context.TODO(), bson.D{{"infoEmailOptIn", optIn}})
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Find(bson.M{"infoEmailOptIn": optIn}).One(&c.customer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), &c.customers); err != nil {
-		panic(err)
-	}
-
-	if c.customers == nil {
-		return nil, errors.New("no customers have opted in")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
 	return &c.customers, nil
 }
 
 func (c CustomerRepoImpl) UpdateOptInStatus(status bool, email string) (*models.Customer, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	opts := options.FindOneAndUpdate()
-	filter := bson.D{{"email", email}}
-	update := bson.D{{"$set", bson.D{{"infoEmailOptIn", status},
-		{"updatedAt", time.Now()}}}}
-
-	err := conn.CustomerCollection.FindOneAndUpdate(context.TODO(),
-		filter, update, opts).Decode(&c.customer)
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Update(bson.M{"email": email}, bson.D{{"$set", bson.D{{"infoEmailOptIn", status},
+		{"updatedAt", time.Now()}}}})
 
 	if err != nil {
 		return nil, errors.New("cannot update opt in status")

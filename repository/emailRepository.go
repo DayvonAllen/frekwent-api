@@ -2,7 +2,7 @@ package repository
 
 import (
 	"freq/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	bson2 "github.com/globalsign/mgo/bson"
 )
 
 type EmailRepo interface {
@@ -11,5 +11,5 @@ type EmailRepo interface {
 	FindAll(string, bool) (*models.EmailList, error)
 	FindAllByEmail(string, bool, string) (*models.EmailList, error)
 	FindAllByStatus(string, bool, *models.Status) (*models.EmailList, error)
-	UpdateEmailStatus(primitive.ObjectID, models.Status) error
+	UpdateEmailStatus(bson2.ObjectId, models.Status) error
 }

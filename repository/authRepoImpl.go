@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"fmt"
 	"freq/database"
 	"freq/helper"
@@ -18,20 +17,17 @@ type AuthRepoImpl struct {
 func (a AuthRepoImpl) Login(username string, password string, ip string) (*models.User, string, error) {
 	var login util.Authentication
 
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
 	if helper.IsEmail(username) {
-		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"email",
-			username}}).Decode(&a.user)
+		err := conn.DB(database.DB).C(database.ADMIN).Find(bson.M{"email": username}).One(&a.user)
 
 		if err != nil {
 			return nil, "", fmt.Errorf("error finding by email")
 		}
 
 	} else {
-		err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"username",
-			username}}).Decode(&a.user)
-
+		err := conn.DB(database.DB).C(database.ADMIN).Find(bson.M{"username": username}).One(&a.user)
 		if err != nil {
 			return nil, "", fmt.Errorf("error finding by username")
 		}

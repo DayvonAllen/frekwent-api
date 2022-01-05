@@ -1,14 +1,12 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"freq/database"
 	"freq/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
@@ -18,18 +16,17 @@ type MailMemberRepoImpl struct {
 }
 
 func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess.Copy()
 
-	err := conn.MailMemberCollection.FindOne(context.TODO(), bson.D{{"memberEmail", mm.MemberEmail}}).Decode(&m.mailMember)
+	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(bson.M{"memberEmail": mm.MemberEmail}).One(&m.mailMember)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
-			mm.Id = primitive.NewObjectID()
+		if err.Error() == "not found" {
 			mm.CreatedAt = time.Now()
 			mm.UpdatedAt = time.Now()
 
-			_, err := conn.MailMemberCollection.InsertOne(context.TODO(), mm)
+			err = conn.DB(database.DB).C(database.MAIL_MEMBERS).Insert(&mm)
 
 			if err != nil {
 				return fmt.Errorf("error processing data")
@@ -44,40 +41,24 @@ func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
 }
 
 func (m MailMemberRepoImpl) FindAll() (*[]models.MailMember, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	cur, err := conn.MailMemberCollection.Find(context.TODO(), bson.M{})
+	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(nil).All(&m.mailMembers)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), &m.mailMembers); err != nil {
-		panic(err)
-	}
-
-	if m.mailMembers == nil {
-		return nil, errors.New("no mail members in the database")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
 	return &m.mailMembers, nil
 }
 
 func (m MailMemberRepoImpl) DeleteById(id primitive.ObjectID) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	res, _ := conn.MailMemberCollection.DeleteOne(context.TODO(), bson.D{{"_id", id}})
+	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).RemoveId(id)
 
-	if res.DeletedCount == 0 {
-		return errors.New("failed to delete Mail Member")
+	if err != nil {
+		return err
 	}
 
 	return nil

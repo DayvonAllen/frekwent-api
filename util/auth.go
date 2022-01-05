@@ -8,15 +8,15 @@ import (
 	"freq/config"
 	"freq/helper"
 	"freq/models"
+	"github.com/globalsign/mgo/bson"
 	"github.com/golang-jwt/jwt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type Authentication struct {
-	Id       primitive.ObjectID
+	Id       bson.ObjectId
 	Username string `bson:"username" json:"username"`
 }
 
@@ -28,7 +28,7 @@ type LoginDetails struct {
 
 type Claims struct {
 	jwt.StandardClaims
-	Id       primitive.ObjectID
+	Id       bson.ObjectId
 	Username string
 }
 

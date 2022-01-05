@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"freq/database"
 	"freq/events"
 	"freq/models"
 	"freq/router"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -19,24 +17,26 @@ import (
 
 func init() {
 
-	conn := database.ConnectToDB()
+	conn := database.ConnectToDB().Copy()
+
+	defer conn.Close()
 
 	user := new(models.User)
-	err := conn.AdminCollection.FindOne(context.TODO(), bson.D{{"email", "admin@admin.com"}}).Decode(user)
+	err := conn.DB(database.DB).C(database.ADMIN).Find(bson.D{{"email", "admin@admin.com"}}).One(&user)
+
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			admin := new(models.User)
 			admin.Email = "admin@admin.com"
 			admin.Username = "admin"
 			admin.Password = "password"
-			admin.Id = primitive.NewObjectID()
 			admin.CreatedAt = time.Now()
 			admin.UpdatedAt = time.Now()
 
 			hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
 			admin.Password = string(hashedPassword)
 
-			_, err = conn.AdminCollection.InsertOne(context.TODO(), admin)
+			err = conn.DB(database.DB).C(database.ADMIN).Insert(admin)
 			if err != nil {
 				return
 			}

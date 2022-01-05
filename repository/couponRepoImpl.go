@@ -1,15 +1,12 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"freq/database"
 	"freq/models"
+	bson2 "github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"time"
 )
@@ -21,18 +18,18 @@ type CouponRepoImpl struct {
 }
 
 func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
 	_, err := c.FindByCode(coupon.Code)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
-			coupon.Id = primitive.NewObjectID()
+		if err.Error() == "not found" {
 			coupon.CreatedAt = time.Now()
 			coupon.UpdatedAt = time.Now()
+			coupon.Id = bson2.NewObjectId()
 
-			_, err = conn.CouponCollection.InsertOne(context.TODO(), coupon)
+			err = conn.DB(database.DB).C(database.COUPONS).Insert(coupon)
 
 			if err != nil {
 				return fmt.Errorf("error processing data")
@@ -47,9 +44,8 @@ func (c CouponRepoImpl) Create(coupon *models.Coupon) error {
 }
 
 func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.CouponList, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	findOptions := options.FindOptions{}
 	perPage := 10
 	pageNumber, err := strconv.Atoi(page)
 
@@ -57,36 +53,17 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.Coupo
 		return nil, fmt.Errorf("page must be a number")
 	}
 
-	findOptions.SetSkip((int64(pageNumber) - 1) * int64(perPage))
-	findOptions.SetLimit(int64(perPage))
-
 	if newCouponQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
-	cur, err := conn.CouponCollection.Find(context.TODO(), bson.M{}, &findOptions)
+	err = conn.DB(database.DB).C(database.COUPONS).Find(nil).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&c.Coupons)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cur.All(context.TODO(), &c.Coupons); err != nil {
-		panic(err)
-	}
-
-	if c.Coupons == nil {
-		return nil, errors.New("no coupons found")
-	}
-
-	// Close the cursor once finished
-	defer func(cur *mongo.Cursor, ctx context.Context) {
-		err := cur.Close(ctx)
-		if err != nil {
-			panic(fmt.Errorf("error processing data"))
-		}
-	}(cur, context.TODO())
-
-	count, err := conn.CouponCollection.CountDocuments(context.TODO(), bson.M{})
+	count, err := conn.DB(database.DB).C(database.COUPONS).Count()
 
 	if err != nil {
 		panic(err)
@@ -107,13 +84,13 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.Coupo
 }
 
 func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	err := conn.CouponCollection.FindOne(context.TODO(), bson.D{{"code", code}}).Decode(&c.Coupon)
+	err := conn.DB(database.DB).C(database.COUPONS).Find(bson.D{{"code", code}}).One(&c.Coupon)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
+		if err.Error() == "not found" {
 			return nil, err
 		}
 		return nil, fmt.Errorf("error processing data")
@@ -123,9 +100,9 @@ func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
 }
 
 func (c CouponRepoImpl) DeleteByCode(code string) error {
-	conn := database.ConnectToDB()
+	conn := database.Sess
 
-	_, err := conn.CouponCollection.DeleteOne(context.TODO(), bson.D{{"code", code}})
+	err := conn.DB(database.DB).C(database.COUPONS).Remove(bson.M{"code": code})
 
 	if err != nil {
 		return fmt.Errorf("error processing data")
