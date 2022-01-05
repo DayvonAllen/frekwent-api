@@ -135,12 +135,12 @@ func (p PurchaseRepoImpl) FindAll(page string, newPurchaseQuery bool) (*models.P
 func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Transactions, error) {
 	conn := database.Sess
 
-	var filter bson.D
+	var filter bson.M
 
 	if strings.ToLower(state) == "all" {
-		filter = bson.D{{"refunded", false}}
+		filter = bson.M{"refunded": false}
 	} else {
-		filter = bson.D{{"state", state}, {"refunded", false}}
+		filter = bson.M{"state": state, "refunded": false}
 	}
 
 	err := conn.DB(database.DB).C(database.PURCHASES).Find(filter).All(&p.purchases)
@@ -149,14 +149,14 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 		return nil, err
 	}
 
-	count, err := conn.DB(database.DB).C(database.PRODUCTS).Count()
+	count, err := conn.DB(database.DB).C(database.PURCHASES).Find(filter).Count()
 
 	if err != nil {
 		panic(err)
 	}
 
 	for _, pur := range p.purchases {
-		p.transaction.TransactionsTotal = int(pur.FinalPrice + int16(p.transaction.TransactionsTotal))
+		p.transaction.TransactionsTotal = pur.FinalPrice + p.transaction.TransactionsTotal
 	}
 
 	p.transaction.NumberOfTransactions = count
@@ -185,7 +185,7 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id bson2.ObjectId) (*models.Purchas
 func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purchase, error) {
 	conn := database.Sess
 
-	err := conn.DB(database.DB).C(database.PURCHASES).Find(bson.D{{"purchaseConfirmationId", id}}).One(&p.purchase)
+	err := conn.DB(database.DB).C(database.PURCHASES).Find(bson.M{"purchaseConfirmationId": id}).One(&p.purchase)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection

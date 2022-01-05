@@ -17,7 +17,7 @@ type Purchase struct {
 	State                  string        `bson:"state" json:"state"`
 	ZipCode                string        `bson:"zipCode" json:"zipCode"`
 	PurchasedItems         *[]Product    `bson:"purchasedItems" json:"purchasedItems"`
-	FinalPrice             int16         `bson:"finalPrice" json:"finalPrice"`
+	FinalPrice             float32       `bson:"finalPrice" json:"finalPrice"`
 	CouponUsed             Coupon        `bson:"couponUsed" json:"couponUsed"`
 	PurchaseConfirmationId string        `bson:"purchaseConfirmationId" json:"purchaseConfirmationId"`
 	PurchaseIntent         string        `bson:"purchaseIntent" json:"purchaseIntent"`
@@ -63,6 +63,6 @@ type PurchaseList struct {
 }
 
 type Transactions struct {
-	TransactionsTotal    int `json:"transactionsTotal"`
-	NumberOfTransactions int `json:"numberOfTransactions"`
+	TransactionsTotal    float32 `json:"transactionsTotal"`
+	NumberOfTransactions int     `json:"numberOfTransactions"`
 }
