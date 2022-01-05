@@ -16,7 +16,7 @@ type MailMemberRepoImpl struct {
 }
 
 func (m MailMemberRepoImpl) Create(mm *models.MailMember) error {
-	conn := database.Sess.Copy()
+	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(bson.M{"memberEmail": mm.MemberEmail}).One(&m.mailMember)
 

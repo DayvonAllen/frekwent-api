@@ -19,7 +19,7 @@ type EmailRepoImpl struct {
 }
 
 func (e EmailRepoImpl) Create(email *models.Email) error {
-	conn := database.Sess.Copy()
+	conn := database.Sess
 
 	email.CreatedAt = time.Now()
 	email.UpdatedAt = time.Now()

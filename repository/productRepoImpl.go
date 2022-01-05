@@ -168,7 +168,7 @@ func (p ProductRepoImpl) FindByProductName(name string) (*models.Product, error)
 }
 
 func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models.Product, error) {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	prod := new(models.Product)
 
@@ -214,7 +214,7 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) 
 }
 
 func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	update := bson.M{"$inc": bson.M{"timesPurchased": 1}, "$set": bson.D{{"updatedAt", time.Now()}}}
 
@@ -228,7 +228,7 @@ func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 }
 
 func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	update := bson.M{"$set": bson.D{{"price", price},
 		{"updatedAt", time.Now()}}}
@@ -245,7 +245,7 @@ func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*mode
 }
 
 func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	update := bson.M{"$set": bson.D{{"description", desc},
 		{"updatedAt", time.Now()}}}
@@ -262,7 +262,7 @@ func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (
 }
 
 func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	update := bson.M{"$set": bson.D{{"ingredients", ingredients},
 		{"updatedAt", time.Now()}}}
@@ -279,7 +279,7 @@ func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.O
 }
 
 func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	update := bson.M{"$set": bson.D{{"category", category},
 		{"updatedAt", time.Now()}}}
@@ -296,7 +296,7 @@ func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) 
 }
 
 func (p ProductRepoImpl) DeleteById(id primitive.ObjectID) error {
-	conn := database.ConnectToDB().Copy()
+	conn := database.Sess
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).RemoveId(id)
 
