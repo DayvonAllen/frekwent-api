@@ -121,7 +121,7 @@ func (e EmailRepoImpl) FindAllByEmail(page string, newEmailQuery bool, email str
 		return nil, errors.New("error finding email")
 	}
 
-	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.D{{"email", email}}).Count()
+	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.M{"email": email}).Count()
 
 	if err != nil {
 		panic(err)
@@ -161,7 +161,7 @@ func (e EmailRepoImpl) FindAllByStatus(page string, newEmailQuery bool, status *
 		return nil, errors.New("error finding email")
 	}
 
-	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.D{{"status", status}}).Count()
+	count, err := conn.DB(database.DB).C(database.EMAILS).Find(bson.M{"status": status}).Count()
 
 	if err != nil {
 		panic(err)
@@ -184,7 +184,7 @@ func (e EmailRepoImpl) FindAllByStatus(page string, newEmailQuery bool, status *
 func (e EmailRepoImpl) UpdateEmailStatus(id bson2.ObjectId, status models.Status) error {
 	conn := database.Sess
 
-	err := conn.DB(database.DB).C(database.EMAILS).UpdateId(id, bson.M{"$set": bson.D{{"updatedAt", time.Now()}, {"status", status}}})
+	err := conn.DB(database.DB).C(database.EMAILS).UpdateId(id, bson.M{"updatedAt": time.Now(), "status": status})
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection

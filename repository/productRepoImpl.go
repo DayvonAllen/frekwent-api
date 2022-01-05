@@ -177,8 +177,8 @@ func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err.Error() == "not found" {
-			update := bson.M{"$set": bson.D{{"name", name},
-				{"updatedAt", time.Now()}}}
+			update := bson.M{"name": name,
+				"updatedAt": time.Now()}
 
 			err = conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
@@ -199,8 +199,8 @@ func (p ProductRepoImpl) UpdateName(name string, id primitive.ObjectID) (*models
 func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.Sess
 
-	update := bson.M{"$set": bson.D{{"quantity", quantity},
-		{"updatedAt", time.Now()}}}
+	update := bson.M{"quantity": quantity,
+		"updatedAt": time.Now()}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
@@ -216,7 +216,7 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id primitive.ObjectID) 
 func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 	conn := database.Sess
 
-	update := bson.M{"$inc": bson.M{"timesPurchased": 1}, "$set": bson.D{{"updatedAt", time.Now()}}}
+	update := bson.M{"$inc": bson.M{"timesPurchased": 1}}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).Update(bson.D{{"name", name}}, update)
 
@@ -230,8 +230,8 @@ func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.Sess
 
-	update := bson.M{"$set": bson.D{{"price", price},
-		{"updatedAt", time.Now()}}}
+	update := bson.M{"price": price,
+		"updatedAt": time.Now()}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
@@ -247,8 +247,8 @@ func (p ProductRepoImpl) UpdatePrice(price string, id primitive.ObjectID) (*mode
 func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.Sess
 
-	update := bson.M{"$set": bson.D{{"description", desc},
-		{"updatedAt", time.Now()}}}
+	update := bson.M{"description": desc,
+		"updatedAt": time.Now()}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
@@ -264,8 +264,8 @@ func (p ProductRepoImpl) UpdateDescription(desc string, id primitive.ObjectID) (
 func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.Sess
 
-	update := bson.M{"$set": bson.D{{"ingredients", ingredients},
-		{"updatedAt", time.Now()}}}
+	update := bson.M{"ingredients": ingredients,
+		"updatedAt": time.Now()}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
@@ -281,8 +281,8 @@ func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id primitive.O
 func (p ProductRepoImpl) UpdateCategory(category string, id primitive.ObjectID) (*models.Product, error) {
 	conn := database.Sess
 
-	update := bson.M{"$set": bson.D{{"category", category},
-		{"updatedAt", time.Now()}}}
+	update := bson.M{"category": category,
+		"updatedAt": time.Now()}
 
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 

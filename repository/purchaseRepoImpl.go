@@ -204,8 +204,8 @@ func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purch
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
 	conn := database.Sess
 
-	update := bson.D{{"$set", bson.D{{"shipped", dto.Shipped},
-		{"trackingId", dto.TrackingId}}}}
+	update := bson.M{"shipped": dto.Shipped,
+		"trackingId": dto.TrackingId}
 
 	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
@@ -219,7 +219,7 @@ func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) er
 func (p PurchaseRepoImpl) UpdateDeliveredStatus(dto *models.PurchaseDeliveredDTO) error {
 	conn := database.Sess
 
-	update := bson.D{{"$set", bson.D{{"delivered", dto.Delivered}}}}
+	update := bson.M{"delivered": dto.Delivered}
 
 	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
@@ -300,11 +300,11 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 
 	wg.Wait()
 
-	update := bson.D{{"$set", bson.D{{"streetAddress", dto.StreetAddress},
-		{"optionalAddress", dto.OptionalAddress},
-		{"city", dto.City},
-		{"state", dto.State},
-		{"zipCode", dto.ZipCode}}}}
+	update := bson.M{"streetAddress": dto.StreetAddress,
+		"optionalAddress": dto.OptionalAddress,
+		"city":            dto.City,
+		"state":           dto.State,
+		"zipCode":         dto.ZipCode}
 
 	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 
@@ -318,7 +318,7 @@ func (p PurchaseRepoImpl) UpdatePurchaseAddress(dto *models.PurchaseAddressDTO) 
 func (p PurchaseRepoImpl) UpdateTrackingNumber(dto *models.PurchaseTrackingDTO) error {
 	conn := database.Sess
 
-	update := bson.D{{"$set", bson.D{{"trackingId", dto.TrackingId}}}}
+	update := bson.M{"trackingId": dto.TrackingId}
 
 	err := conn.DB(database.DB).C(database.PURCHASES).UpdateId(dto.Id, update)
 

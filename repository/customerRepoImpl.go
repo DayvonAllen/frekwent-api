@@ -305,8 +305,8 @@ func (c CustomerRepoImpl) FindAllByOptInStatus(optIn bool) (*[]models.Customer, 
 func (c CustomerRepoImpl) UpdateOptInStatus(status bool, email string) (*models.Customer, error) {
 	conn := database.Sess
 
-	err := conn.DB(database.DB).C(database.CUSTOMERS).Update(bson.M{"email": email}, bson.D{{"$set", bson.D{{"infoEmailOptIn", status},
-		{"updatedAt", time.Now()}}}})
+	err := conn.DB(database.DB).C(database.CUSTOMERS).Update(bson.M{"email": email}, bson.M{"infoEmailOptIn": status,
+		"updatedAt": time.Now()})
 
 	if err != nil {
 		return nil, errors.New("cannot update opt in status")

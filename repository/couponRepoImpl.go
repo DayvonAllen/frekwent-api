@@ -86,7 +86,7 @@ func (c CouponRepoImpl) FindAll(page string, newCouponQuery bool) (*models.Coupo
 func (c CouponRepoImpl) FindByCode(code string) (*models.Coupon, error) {
 	conn := database.Sess
 
-	err := conn.DB(database.DB).C(database.COUPONS).Find(bson.D{{"code", code}}).One(&c.Coupon)
+	err := conn.DB(database.DB).C(database.COUPONS).Find(bson.M{"code": code}).One(&c.Coupon)
 
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
