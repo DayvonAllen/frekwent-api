@@ -130,7 +130,6 @@ func EncryptPI(purchase *models.Purchase) *models.Purchase {
 
 	go func() {
 		defer wg.Done()
-		purchase.PurchaseConfirmationId = RandomString(32)
 		purchase.Shipped = false
 		purchase.Delivered = false
 		purchase.TrackingId = ""

@@ -7,27 +7,26 @@ import (
 )
 
 type Purchase struct {
-	Id                     bson.ObjectId `bson:"_id" json:"id"`
-	FirstName              string        `bson:"firstName" json:"firstName"`
-	LastName               string        `bson:"lastName" json:"lastName"`
-	Email                  string        `bson:"email" json:"email"`
-	StreetAddress          string        `bson:"streetAddress" json:"streetAddress"`
-	OptionalAddress        string        `bson:"optionalAddress" json:"optionalAddress"`
-	City                   string        `bson:"city" json:"city"`
-	State                  string        `bson:"state" json:"state"`
-	ZipCode                string        `bson:"zipCode" json:"zipCode"`
-	PurchasedItems         *[]Product    `bson:"purchasedItems" json:"purchasedItems"`
-	FinalPrice             float32       `bson:"finalPrice" json:"finalPrice"`
-	CouponUsed             Coupon        `bson:"couponUsed" json:"couponUsed"`
-	PurchaseConfirmationId string        `bson:"purchaseConfirmationId" json:"purchaseConfirmationId"`
-	PurchaseIntent         string        `bson:"purchaseIntent" json:"purchaseIntent"`
-	TrackingId             string        `bson:"trackingId" json:"trackingId"`
-	Shipped                bool          `bson:"shipped" json:"shipped"`
-	Delivered              bool          `bson:"delivered" json:"delivered"`
-	InfoEmailOptIn         bool          `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
-	Refunded               bool          `bson:"refunded" json:"refunded"`
-	CreatedAt              time.Time     `bson:"createdAt" json:"-"`
-	UpdatedAt              time.Time     `bson:"updatedAt" json:"-"`
+	Id              bson.ObjectId `bson:"_id" json:"id"`
+	FirstName       string        `bson:"firstName" json:"firstName"`
+	LastName        string        `bson:"lastName" json:"lastName"`
+	Email           string        `bson:"email" json:"email"`
+	StreetAddress   string        `bson:"streetAddress" json:"streetAddress"`
+	OptionalAddress string        `bson:"optionalAddress" json:"optionalAddress"`
+	City            string        `bson:"city" json:"city"`
+	State           string        `bson:"state" json:"state"`
+	ZipCode         string        `bson:"zipCode" json:"zipCode"`
+	PurchasedItems  *[]Product    `bson:"purchasedItems" json:"purchasedItems"`
+	FinalPrice      float32       `bson:"finalPrice" json:"finalPrice"`
+	CouponUsed      Coupon        `bson:"couponUsed" json:"couponUsed"`
+	PurchaseIntent  string        `bson:"purchaseIntent" json:"purchaseIntent"`
+	TrackingId      string        `bson:"trackingId" json:"trackingId"`
+	Shipped         bool          `bson:"shipped" json:"shipped"`
+	Delivered       bool          `bson:"delivered" json:"delivered"`
+	InfoEmailOptIn  bool          `bson:"infoEmailOptIn" json:"infoEmailOptIn"`
+	Refunded        bool          `bson:"refunded" json:"refunded"`
+	CreatedAt       time.Time     `bson:"createdAt" json:"-"`
+	UpdatedAt       time.Time     `bson:"updatedAt" json:"-"`
 }
 
 type PurchaseAddressDTO struct {

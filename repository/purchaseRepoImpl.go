@@ -182,24 +182,6 @@ func (p PurchaseRepoImpl) FindByPurchaseById(id bson2.ObjectId) (*models.Purchas
 	return &p.purchase, nil
 }
 
-func (p PurchaseRepoImpl) FindByPurchaseConfirmationId(id string) (*models.Purchase, error) {
-	conn := database.Sess
-
-	err := conn.DB(database.DB).C(database.PURCHASES).Find(bson.M{"purchaseConfirmationId": id}).One(&p.purchase)
-
-	if err != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err.Error() == "not found" {
-			return nil, errors.New(fmt.Sprintf("error finding purchases with purchase confirmation ID %v", id))
-		}
-		return nil, fmt.Errorf("error processing data")
-	}
-
-	p.purchase = *helper.DecryptPI(&p.purchase)
-
-	return &p.purchase, nil
-}
-
 func (p PurchaseRepoImpl) UpdateShippedStatus(dto *models.PurchaseShippedDTO) error {
 	conn := database.Sess
 

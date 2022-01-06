@@ -21,7 +21,6 @@
   - `http://localhost:8080/iriguchi/customer` - get all customers
   - `http://localhost:8080/iriguchi/customer/name?firstName=<firstName>&lastName=<lastName>` - get customers by first name and last name
   - `http://localhost:8080/iriguchi/auth/logout` - logout
-  - `http://localhost:8080/iriguchi/purchases/confirmation/<confirmation ID>` - get purchase by confirmation ID
   - `http://localhost:8080/iriguchi/email` - get all emails
   - `http://localhost:8080/iriguchi/email/get/<email address>` - get emails by email address
   - `http://localhost:8080/iriguchi/customer/optin` - get all customers that have opted in to receiving emails
