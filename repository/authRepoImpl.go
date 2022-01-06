@@ -14,7 +14,7 @@ type AuthRepoImpl struct {
 	user models.User
 }
 
-func (a AuthRepoImpl) Login(username string, password string, ip string) (*models.User, string, error) {
+func (a AuthRepoImpl) Login(username string, password string, ip string, ips *[]string) (*models.User, string, error) {
 	var login util.Authentication
 
 	conn := database.Sess
@@ -48,6 +48,7 @@ func (a AuthRepoImpl) Login(username string, password string, ip string) (*model
 	ipAddress := new(models.LoginIP)
 
 	ipAddress.IpAddress = ip
+	ipAddress.IpAddresses = *ips
 
 	go func() {
 		err := LoginIpRepoImpl{}.Create(ipAddress)

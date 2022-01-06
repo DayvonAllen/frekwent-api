@@ -7,15 +7,15 @@ import (
 )
 
 type AuthService interface {
-	Login(username string, password string, ip string) (*models.User, string, error)
+	Login(username string, password string, ip string, ips *[]string) (*models.User, string, error)
 }
 
 type DefaultAuthService struct {
 	repo repository.AuthRepo
 }
 
-func (a DefaultAuthService) Login(username string, password string, ip string) (*models.User, string, error) {
-	u, token, err := a.repo.Login(username, password, ip)
+func (a DefaultAuthService) Login(username string, password string, ip string, ips *[]string) (*models.User, string, error) {
+	u, token, err := a.repo.Login(username, password, ip, ips)
 	if err != nil {
 		fmt.Println(err)
 		return nil, "", err

@@ -6,11 +6,12 @@ import (
 )
 
 type LoginIP struct {
-	Id         bson.ObjectId `bson:"_id" json:"id"`
-	IpAddress  string        `bson:"ipAddress" json:"ipAddress"`
-	AccessedAt time.Time     `bson:"accessedAt" json:"accessedAt"`
-	CreatedAt  time.Time     `bson:"createdAt" json:"-"`
-	UpdatedAt  time.Time     `bson:"updatedAt" json:"updatedAt"`
+	Id          bson.ObjectId `bson:"_id" json:"id"`
+	IpAddress   string        `bson:"ipAddress" json:"ipAddress"`
+	IpAddresses []string      `bson:"ipAddresses" json:"ipAddresses"`
+	AccessedAt  time.Time     `bson:"accessedAt" json:"accessedAt"`
+	CreatedAt   time.Time     `bson:"createdAt" json:"-"`
+	UpdatedAt   time.Time     `bson:"updatedAt" json:"updatedAt"`
 }
 
 type LoginIpList struct {
