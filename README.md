@@ -192,3 +192,11 @@
 - `http://localhost:8080/iriguchi/items/delete/<id>` - delete product by ID
 - `http://localhost:8080/iriguchi/coupon/code/<code>` - delete coupon by code
 ---
+
+## Prometheus Command
+- `docker run -p 9090:9090 -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus`
+---
+
+## Docker Build
+- `docker build -t freq .`
+---

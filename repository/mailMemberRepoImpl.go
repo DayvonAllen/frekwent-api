@@ -47,7 +47,7 @@ func (m MailMemberRepoImpl) FindAll() (*[]models.MailMember, error) {
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).Find(nil).All(&m.mailMembers)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error getting all mail members")
 	}
 
 	return &m.mailMembers, nil
@@ -59,7 +59,7 @@ func (m MailMemberRepoImpl) DeleteById(id bson2.ObjectId) error {
 	err := conn.DB(database.DB).C(database.MAIL_MEMBERS).RemoveId(id)
 
 	if err != nil {
-		return err
+		return errors.New("error deleting by ID")
 	}
 
 	return nil

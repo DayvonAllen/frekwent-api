@@ -26,14 +26,47 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
 #      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
-  mongo:
-    image: mongo
-    container_name: mongo
+#  mongodb:
+#    image: mongo
+#    container_name: mongodb
+#    ports:
+#      - "27017:27017"
+  freq:
+    build: ../
+    container_name: freq
+    env_file:
+      - ../.env
     ports:
-      - "27017:27017"
+      - "8080:8080"
+    depends_on:
+      - zookeeper
+      - mailhog
+      - kafka1
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
       - "8025:8025"
       - "1025:1025"
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    depends_on:
+      - freq
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+
+networks:
+  default:
+    # Use a custom driver
+    driver: custom-driver-1

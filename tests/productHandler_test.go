@@ -57,9 +57,7 @@ func TestProductHandler_FindAll(t *testing.T) {
 		}
 	}(pool, resource)
 
-	conn := database.ConnectToDB().Copy()
-
-	defer conn.Close()
+	conn := database.Sess
 
 	monId := bson2.ObjectIdHex("61caa9598eaeae5425c9780f")
 

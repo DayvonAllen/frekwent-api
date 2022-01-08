@@ -66,14 +66,14 @@ func (p ProductRepoImpl) FindAll(page string, newProductQuery bool, trending boo
 	err = conn.DB(database.DB).C(database.PRODUCTS).Find(nil).Skip((pageNumber - 1) * perPage).Limit(perPage).All(&p.products)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error getting all products")
 	}
 
 	if p.productList.NumberOfProducts != 3 {
 		count, err := conn.DB(database.DB).C(database.PRODUCTS).Count()
 
 		if err != nil {
-			panic(err)
+			return nil, errors.New("error getting all products")
 		}
 
 		p.productList.NumberOfProducts = count
@@ -121,19 +121,19 @@ func (p ProductRepoImpl) FindAllByCategory(category string, page string, newProd
 	findOptions.SetLimit(int64(perPage))
 
 	if newProductQuery {
-		findOptions.SetSort(bson.D{{"createdAt", -1}})
+		//findOptions.SetSort(bson.D{{"createdAt", -1}})
 	}
 
 	err = conn.DB(database.DB).C(database.PRODUCTS).Find(bson.M{"category": category}).All(p.products)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error finding by category")
 	}
 
 	count, err := conn.DB(database.DB).C(database.IPS).Count()
 
 	if err != nil {
-		panic(err)
+		return nil, errors.New("error getting all by category")
 	}
 
 	p.productList.NumberOfProducts = count
@@ -158,7 +158,7 @@ func (p ProductRepoImpl) FindByProductId(id bson2.ObjectId) (*models.Product, er
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err.Error() == "not found" {
-			return nil, err
+			return nil, errors.New("not found")
 		}
 		return nil, fmt.Errorf("error processing data")
 	}
@@ -174,7 +174,7 @@ func (p ProductRepoImpl) FindByProductName(name string) (*models.Product, error)
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err.Error() == "not found" {
-			return nil, err
+			return nil, errors.New("not found")
 		}
 		return nil, fmt.Errorf("error processing data")
 	}
@@ -198,7 +198,7 @@ func (p ProductRepoImpl) UpdateName(name string, id bson2.ObjectId) (*models.Pro
 			err = conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 			if err != nil {
-				return nil, err
+				return nil, errors.New("error updating by name")
 			}
 
 			p.product.Name = name
@@ -220,7 +220,7 @@ func (p ProductRepoImpl) UpdateQuantity(quantity uint16, id bson2.ObjectId) (*mo
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error updating quantity")
 	}
 
 	p.product.Quantity = quantity
@@ -239,7 +239,7 @@ func (p ProductRepoImpl) UpdatePurchaseCount(name string) error {
 	_, err := conn.DB(database.DB).C(database.PRODUCTS).Find(bson.M{"name": name}).Apply(update, &p.product)
 
 	if err != nil {
-		return err
+		return errors.New("error updating purchase count")
 	}
 
 	return nil
@@ -254,7 +254,7 @@ func (p ProductRepoImpl) UpdatePrice(price string, id bson2.ObjectId) (*models.P
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error updating price")
 	}
 
 	p.product.Price = price
@@ -271,7 +271,7 @@ func (p ProductRepoImpl) UpdateDescription(desc string, id bson2.ObjectId) (*mod
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error updating description")
 	}
 
 	p.product.Description = desc
@@ -288,7 +288,7 @@ func (p ProductRepoImpl) UpdateIngredients(ingredients *[]string, id bson2.Objec
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error updating ingredients")
 	}
 
 	p.product.Ingredients = *ingredients
@@ -305,7 +305,7 @@ func (p ProductRepoImpl) UpdateCategory(category string, id bson2.ObjectId) (*mo
 	err := conn.DB(database.DB).C(database.PRODUCTS).UpdateId(id, update)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error updating category")
 	}
 
 	p.product.Category = category
@@ -319,7 +319,7 @@ func (p ProductRepoImpl) DeleteById(id bson2.ObjectId) error {
 	err := conn.DB(database.DB).C(database.PRODUCTS).RemoveId(id)
 
 	if err != nil {
-		return err
+		return errors.New("error deleting by ID")
 	}
 
 	return nil

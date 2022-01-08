@@ -6,7 +6,7 @@ import (
 	"freq/events"
 	"freq/models"
 	"freq/router"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -16,10 +16,24 @@ import (
 )
 
 func init() {
+	//_, err = conn.PurchaseCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
+	//
+	//_, err = conn.CustomerCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
+	//_, err = conn.EmailCollection.DeleteMany(context.TODO(), bson.M{})
+	//if err != nil {
+	//	return
+	//}
+}
 
-	conn := database.ConnectToDB().Copy()
-
-	defer conn.Close()
+func main() {
+	time.Sleep(10 * time.Second)
+	conn := database.Sess
 
 	user := new(models.User)
 	err := conn.DB(database.DB).C(database.ADMIN).Find(bson.D{{"email", "admin@admin.com"}}).One(&user)
@@ -45,22 +59,6 @@ func init() {
 
 	go events.CreateConsumer()
 
-	//_, err = conn.PurchaseCollection.DeleteMany(context.TODO(), bson.M{})
-	//if err != nil {
-	//	return
-	//}
-	//
-	//_, err = conn.CustomerCollection.DeleteMany(context.TODO(), bson.M{})
-	//if err != nil {
-	//	return
-	//}
-	//_, err = conn.EmailCollection.DeleteMany(context.TODO(), bson.M{})
-	//if err != nil {
-	//	return
-	//}
-}
-
-func main() {
 	app := router.Setup()
 
 	c := make(chan os.Signal, 1)

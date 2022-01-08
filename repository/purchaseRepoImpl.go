@@ -146,13 +146,13 @@ func (p PurchaseRepoImpl) CalculateTransactionsByState(state string) (*models.Tr
 	err := conn.DB(database.DB).C(database.PURCHASES).Find(filter).All(&p.purchases)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error calculating by state")
 	}
 
 	count, err := conn.DB(database.DB).C(database.PURCHASES).Find(filter).Count()
 
 	if err != nil {
-		panic(err)
+		return nil, errors.New("error calculating by state")
 	}
 
 	for _, pur := range p.purchases {
